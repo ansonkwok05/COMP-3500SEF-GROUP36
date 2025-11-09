@@ -36,6 +36,11 @@ function login_user(email, password) {
     // check if it is an invalid email
     if (email == "" || email.indexOf("@") == -1) return false;
 
+    if (!check_user_exists(email)) return false;
+
+    // check if password matches
+    if (user_data[email]?.password != password) return false;
+
     return true;
 }
 

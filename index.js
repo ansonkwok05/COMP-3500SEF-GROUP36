@@ -1,4 +1,5 @@
 const EXPRESS = require("express");
+const BODYPARSER = require("body-parser");
 const APP = EXPRESS();
 
 const USER_MANAGER = require("./src/user_manager.js");
@@ -12,23 +13,30 @@ APP.use("/index.html", (req, res) => res.send(ERR_PAGE));
 APP.use("/", EXPRESS.static("./public/index.html"));
 APP.use(EXPRESS.static("./public"));
 
-APP.use(EXPRESS.urlencoded({extended: true}));
-APP.use(EXPRESS.json());
+APP.use(BODYPARSER.urlencoded({extended: true}));
 
 APP.post("/register", (req, res) => {
     const {email, password} = req.body;
 
-    console.log(`Register attempt: ${email}, ${password}}`);
-
-    USER_MANAGER.register_user(email, password);
+    if (USER_MANAGER.register_user(email, password)) {
+        console.log(`Register Success: ${email}, ${password}`);
+        res.status(200).send("Registered");
+    } else {
+        console.log(`Register Fail: ${email}, ${password}`);
+        res.status(401).send("Register failed");
+    }
 });
 
 APP.post("/login", (req, res) => {
     const {email, password} = req.body;
 
-    console.log(`Login attempt: ${email}, ${password}}`);
-
-    USER_MANAGER.login_user(email, password);
+    if (USER_MANAGER.login_user(email, password)) {
+        console.log(`Login Success: ${email}, ${password}`);
+        res.status(200).send("Logged in");
+    } else {
+        console.log(`Login Fail: ${email}, ${password}`);
+        res.status(401).send("Log in failed");
+    }
 });
 
 // send error page to all unknown route
