@@ -1,0 +1,21 @@
+{
+  "name": "food-ordering-and-tracking",
+  "version": "1.0.0",
+  "description": "web app for food ordering and tracking",
+  "homepage": "https://github.com/ansonkwok05/food-ordering-and-tracking-hkmu#readme",
+  "bugs": {
+    "url": "https://github.com/ansonkwok05/food-ordering-and-tracking-hkmu/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ansonkwok05/food-ordering-and-tracking-hkmu.git"
+  },
+  "license": "ISC",
+  "author": "s1390147",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
