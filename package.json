@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/ansonkwok05/food-ordering-and-tracking-hkmu.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "author": "s1390147",
   "type": "commonjs",
   "main": "index.js",
