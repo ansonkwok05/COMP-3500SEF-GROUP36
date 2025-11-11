@@ -53,10 +53,13 @@ APP.post("/login", (req, res) => {
 
         // set session userID so user only need to sign in once per session
         req.session.userID = USER_MANAGER.get_user_id(email);
-        res.status(200).send("Logged in");
+        res.status(200).json({success: true});
     } else {
         console.log(`Login Fail: ${email}, ${password}`);
-        res.status(401).send("Log in failed");
+        res.status(401).json({
+            success: false,
+            reason: "incorrect email or password",
+        });
     }
 });
 
@@ -66,7 +69,7 @@ APP.use((req, res, next) => {
         // userID exists, but still need to validate
         if (USER_MANAGER.validate_user_id(req.session.userID)) return next();
     }
-    console.log(`Redirected connection to /login.html`);
+    console.log(`Redirected connection "${req.path}" -> "/login.html"`);
     res.redirect("/login.html");
 });
 
