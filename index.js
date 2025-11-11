@@ -5,7 +5,7 @@ const APP = EXPRESS();
 const USER_MANAGER = require("./src/user_manager.js");
 
 const PORT = process.env.PORT || 8080;
-const ERR_PAGE = "404";
+const ERR_MESSAGE = "Page not found";
 
 // expose ./public folder
 // "/index.html" is replaced with "/"
@@ -45,7 +45,7 @@ APP.post("/login", (req, res) => {
 
 // send error page to all unknown route
 APP.use((req, res) => {
-    res.send(ERR_PAGE);
+    res.status(404).send(ERR_MESSAGE);
 });
 
 APP.listen(PORT, () => {
