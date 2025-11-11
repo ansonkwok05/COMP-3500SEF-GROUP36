@@ -19,10 +19,14 @@ APP.post("/register", (req, res) => {
     const {email, password, name, address} = req.body;
 
     if (USER_MANAGER.register_user(email, password, name, address)) {
-        console.log(`Register Success: ${email}, ${password}`);
+        console.log(
+            `Register Success: ${email}, ${password}, ${name}, ${address}`
+        );
         res.status(200).send("Registered");
     } else {
-        console.log(`Register Fail: ${email}, ${password}`);
+        console.log(
+            `Register Fail: ${email}, ${password}, ${name}, ${address}`
+        );
         res.status(401).send("Register failed");
     }
 });
