@@ -3,6 +3,7 @@ const BODYPARSER = require("body-parser");
 const APP = EXPRESS();
 
 const USER_MANAGER = require("./src/user_manager.js");
+const RESTAURANT = require("./src/restaurant.js");
 
 const PORT = process.env.PORT || 8080;
 const ERR_MESSAGE = "Page not found";
@@ -41,6 +42,25 @@ APP.post("/login", (req, res) => {
         console.log(`Login Fail: ${email}, ${password}`);
         res.status(401).send("Log in failed");
     }
+});
+
+APP.get("/api/restaurants", (req, res) => {
+    // return list of restaurant
+    res.status(200).json({
+        restaurants: RESTAURANT.get_restaurant_list(),
+    });
+});
+
+APP.get("/api/restaurants/menu/:id", (req, res) => {
+    // return menu by restaurant id
+    let menu = RESTAURANT.get_menu(req.params.id);
+
+    if (menu === false)
+        return res.status(404).json({
+            error: "Restaurant not found",
+        });
+
+    res.status(200).json(menu);
 });
 
 // send error page to all unknown route
