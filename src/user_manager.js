@@ -21,21 +21,29 @@ function generate_uuid(size) {
     return uuid;
 }
 
-function register_user(email, password) {
+function register_user(email, password, name, address) {
     if (check_user_exists(email)) return false;
 
+    // check if email is invalid
+    if (email == "" || email.indexOf("@") == -1) return false;
+
+    // restrains for password
+    if (password.length < 8) return false;
+
+    // required information
+    if (name == "" || address == "") return false;
+
     user_data[email] = {
-        password: password,
         id: generate_uuid(16),
+        password: password,
+        name: name,
+        address: address,
     };
 
     return true;
 }
 
 function login_user(email, password) {
-    // check if it is an invalid email
-    if (email == "" || email.indexOf("@") == -1) return false;
-
     if (!check_user_exists(email)) return false;
 
     // check if password matches

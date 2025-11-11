@@ -16,9 +16,9 @@ APP.use(EXPRESS.static("./public"));
 APP.use(BODYPARSER.urlencoded({extended: true}));
 
 APP.post("/register", (req, res) => {
-    const {email, password} = req.body;
+    const {email, password, name, address} = req.body;
 
-    if (USER_MANAGER.register_user(email, password)) {
+    if (USER_MANAGER.register_user(email, password, name, address)) {
         console.log(`Register Success: ${email}, ${password}`);
         res.status(200).send("Registered");
     } else {
