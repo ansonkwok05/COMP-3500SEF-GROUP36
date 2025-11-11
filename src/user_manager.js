@@ -1,26 +1,13 @@
+const {generate_uuid} = require("./utils.js");
+
 // user data implemented with an object
-// uses email and password for login, user_id for logging / authentication purposes
+// uses email and password for login, user id for logging / authentication purposes
 // todo: change this to a more acceptable way (using a database)
 let user_data = {};
 
 function check_user_exists(email) {
     if (email in user_data) return true;
-
-    console.log(`User doesn't exists -> ${email}`);
     return false;
-}
-
-function generate_uuid(size) {
-    let uuid = "";
-
-    let i = 0;
-    while (i < size) {
-        const rand = Math.floor(Math.random() * 16);
-        uuid += rand.toString(16);
-        i++;
-    }
-
-    return uuid;
 }
 
 function register_user(email, password, name, address) {
@@ -54,4 +41,15 @@ function login_user(email, password) {
     return true;
 }
 
-module.exports = {register_user, login_user};
+function get_user_id(email) {
+    return user_data[email].id;
+}
+
+function validate_user_id(user_id) {
+    for (email in user_data) {
+        if (user_data[email].id == user_id) return true;
+    }
+    return false;
+}
+
+module.exports = {register_user, login_user, get_user_id, validate_user_id};

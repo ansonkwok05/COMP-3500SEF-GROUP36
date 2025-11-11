@@ -68,8 +68,6 @@ let restaurant_data = {
 
 function check_restaurant_exists(restaurant_id) {
     if (restaurant_id in restaurant_data) return true;
-
-    console.log(`Restaurant doesn't exists -> ${restaurant_id}`);
     return false;
 }
 
