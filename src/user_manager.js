@@ -5,6 +5,8 @@ let user_data = {};
 
 function check_user_exists(email) {
     if (email in user_data) return true;
+
+    console.log(`User doesn't exists -> ${email}`);
     return false;
 }
 
@@ -34,7 +36,7 @@ function register_user(email, password, name, address) {
     if (name == "" || address == "") return false;
 
     user_data[email] = {
-        id: generate_uuid(16),
+        id: generate_uuid(16), // use random 16 digit hex for id
         password: password,
         name: name,
         address: address,
