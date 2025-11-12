@@ -3,6 +3,8 @@ const SESSION = require("express-session");
 const BODYPARSER = require("body-parser");
 const APP = EXPRESS();
 
+const path = require("path");
+
 const UTILS = require("./src/utils.js");
 const USER_MANAGER = require("./src/user_manager.js");
 const RESTAURANT = require("./src/restaurant.js");
@@ -75,6 +77,14 @@ APP.use((req, res, next) => {
 
 // expose ./public to authorized users only
 APP.use(EXPRESS.static("public"));
+
+APP.get("/menu.html", (req, res) => {
+    res.status(404).send(ERR_MESSAGE);
+});
+
+APP.get("/restaurants/menu/*", (req, res) => {
+    res.sendFile(path.join(__dirname, "/public/menu.html"));
+});
 
 APP.get("/api/restaurants", (req, res) => {
     // return list of restaurant
