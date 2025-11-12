@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrderStatus</title>
+    <script type="module">
+        import { OrderStateMachine } from './StateMachine.js';
+        // for test
+        window.osm = new OrderStateMachine();
+        osm.changeStateCreated(true);
+        osm.changeStatecancelOrder(true);
+        var list = osm.getCurrentState()
+        document.getElementById('create').textContent           = list[0];
+        document.getElementById('OrderAccept').textContent      = list[1];
+        document.getElementById('FoodPrepare').textContent      = list[2];
+        document.getElementById('RiderAccept').textContent      = list[3];
+        document.getElementById('Delivery').textContent         = list[4];
+        document.getElementById('OrderFinish').textContent      = list[5];
+        document.getElementById('Cancel').textContent           = list[6];
+    </script>
+</head>
+<body>
+    <div id="app">
+        <h1 id="orderId"></h1>
+        <h1>-----------------------------------</h1>
+        <h2 id="create"></h2>
+        <h2 id="OrderAccept"></h2>
+        <h2 id="FoodPrepare"></h2>
+        <h2 id="RiderAccept"></h2>
+        <h2 id="Delivery"></h2>
+        <h2 id="OrderFinish"></h2>
+        <h2 id="Cancel"></h2>
+    </div>
+</body>
+</html>
