@@ -82,7 +82,9 @@ APP.get("/menu.html", (req, res) => {
     res.status(404).send(ERR_MESSAGE);
 });
 
-APP.get("/restaurants/menu/*", (req, res) => {
+APP.use("/restaurants/menu/", EXPRESS.static("./public"));
+
+APP.get("/restaurants/menu/:id/", (req, res) => {
     res.sendFile(path.join(__dirname, "/public/menu.html"));
 });
 
