@@ -3,7 +3,15 @@ const {generate_uuid} = require("./utils.js");
 // user data implemented with an object
 // uses email and password for login, user id for logging / authentication purposes
 // todo: change this to a more acceptable way (using a database)
-let user_data = {};
+let user_data = {
+    // test user
+    "test@email": {
+        id: "0123456789ABCDEF",
+        password: "testtest",
+        name: "test name",
+        address: "test address",
+    },
+};
 
 function check_user_exists(email) {
     if (email in user_data) return true;
