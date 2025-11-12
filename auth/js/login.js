@@ -72,7 +72,7 @@ document.getElementById("login_button").addEventListener("click", () => {
 
     fetch("/login", {method: "POST", body: data}).then((res) => {
         if (res.status == 200) {
-            location.href = "/menu.html";
+            location.href = "/restaurantList.html";
             return;
         }
 
