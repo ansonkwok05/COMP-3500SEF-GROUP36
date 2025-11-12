@@ -1,17 +1,87 @@
-document.getElementById("login_button").addEventListener("click", () => {
-    let email = document.getElementById("email_input").value;
-    let password = document.getElementById("password_input").value;
+let valid_email = true;
+document.getElementById("email_input").addEventListener("input", (e) => {
+    let email = e.target.value;
 
-    const data = new URLSearchParams();
-    data.append("email", email);
-    data.append("password", password);
+    if (email.length == 0) {
+        // ignore. requirement message will be poped if user clicks login
+        valid_email = true;
+        document.getElementById("email_input_requirement").textContent = "";
+        return;
+    }
 
-    fetch("/login", {method: "POST", body: data}).then((res) => {
-        if (res.status == 200) location.href = "/menu.html";
+    let at_count = email.split("@").length - 1;
 
-        // todo handle 401 error
-    });
+    if (at_count < 1) {
+        valid_email = false;
+        document.getElementById(
+            "email_input_requirement"
+        ).textContent = `Missing "@"`;
+        return;
+    }
+
+    if (at_count > 1) {
+        valid_email = false;
+        document.getElementById(
+            "email_input_requirement"
+        ).textContent = `"@" should appear once only`;
+        return;
+    }
+
+    valid_email = true;
+    document.getElementById("email_input_requirement").textContent = "";
 });
 
-// todo detect < 8 length password
-// todo detect email without @
+let valid_password = true;
+document.getElementById("password_input").addEventListener("input", (e) => {
+    let password = e.target.value;
+
+    if (password.length < 8) {
+        // removes requirement message
+        valid_password = true;
+        document.getElementById("password_input_requirement").textContent = "";
+        return;
+    }
+});
+
+document.getElementById("login_button").addEventListener("click", () => {
+    if (!valid_email || !valid_password) return;
+
+    let email_input = document.getElementById("email_input").value;
+    let password_input = document.getElementById("password_input").value;
+
+    if (email_input.length == 0) {
+        document.getElementById("email_input_requirement").textContent =
+            "Email is empty";
+    }
+
+    if (password_input.length == 0) {
+        document.getElementById("password_input_requirement").textContent =
+            "Password is empty";
+        return;
+    }
+
+    if (password_input.length < 8) {
+        document.getElementById("password_input_requirement").textContent =
+            "Password length is less than 8";
+        return;
+    }
+
+    const data = new URLSearchParams();
+    data.append("email", email_input);
+    data.append("password", password_input);
+
+    fetch("/login", {method: "POST", body: data}).then((res) => {
+        if (res.status == 200) {
+            location.href = "/menu.html";
+            return;
+        }
+
+        if (res.status == 401) {
+            document.getElementById("email_input_requirement").textContent =
+                "Incorrect email";
+            document.getElementById("password_input_requirement").textContent =
+                "Incorrect password";
+            return;
+        }
+    });
+});
