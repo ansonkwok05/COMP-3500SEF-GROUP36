@@ -55,7 +55,7 @@ APP.post("/login", (req, res) => {
 
         // set session userID so user only need to sign in once per session
         req.session.userID = USER_MANAGER.get_user_id(email);
-        res.status(200).json({success: true});
+        res.redirect("/restaurantList/restaurantList.html");
     } else {
         console.log(`Login Fail: ${email}, ${password}`);
         res.status(401).json({
@@ -75,17 +75,18 @@ APP.use((req, res, next) => {
     res.redirect("/login.html");
 });
 
-// expose ./public to authorized users only
-APP.use(EXPRESS.static("public"));
+APP.use(
+    "/restaurantList/",
+    EXPRESS.static(path.join(__dirname, "/public/restaurantList"))
+);
 
-APP.get("/menu.html", (req, res) => {
-    res.status(404).send(ERR_MESSAGE);
-});
-
-APP.use("/restaurants/menu/", EXPRESS.static("./public"));
+APP.use(
+    "/restaurants/menu/",
+    EXPRESS.static(path.join(__dirname, "/public/menu"))
+);
 
 APP.get("/restaurants/menu/:id/", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/menu.html"));
+    res.sendFile(path.join(__dirname, "/public/menu/menu.html"));
 });
 
 APP.get("/api/restaurants", (req, res) => {
@@ -106,6 +107,11 @@ APP.get("/api/restaurants/menu/:id", (req, res) => {
 
     res.status(200).json(menu);
 });
+
+APP.use(
+    "/order_tracking/",
+    EXPRESS.static(path.join(__dirname, "/public/order_tracking"))
+);
 
 // send error page to all unknown route
 APP.use((req, res) => {

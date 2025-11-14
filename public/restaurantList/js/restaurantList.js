@@ -14,7 +14,7 @@ fetch("/api/restaurants")
         let r_list = "";
 
         json.restaurants.forEach((restaurant) => {
-            r_list += `<a href="restaurants/menu/${restaurant.id}">`;
+            r_list += `<a href="/restaurants/menu/${restaurant.id}">`;
             r_list += `<div class="restaurant-item"><h2>${restaurant.name}</h2></div>`;
             r_list += `</a>`;
         });
