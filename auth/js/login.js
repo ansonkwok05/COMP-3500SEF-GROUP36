@@ -71,8 +71,8 @@ document.getElementById("login_button").addEventListener("click", () => {
     data.append("password", password_input);
 
     fetch("/login", {method: "POST", body: data}).then((res) => {
-        if (res.status == 200) {
-            location.href = "/restaurantList.html";
+        if (res.redirected) {
+            window.location.href = res.url;
             return;
         }
 
