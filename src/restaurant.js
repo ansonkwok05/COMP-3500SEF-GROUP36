@@ -66,29 +66,59 @@ let restaurant_data = {
     },
 };
 
-function check_restaurant_exists(restaurant_id) {
-    if (restaurant_id in restaurant_data) return true;
-    return false;
+const sqlite3 = require("sqlite3");
+
+// sqlite db connection
+// initialized during runtime
+let db;
+
+function initialize_db(db_path) {
+    db = new sqlite3.Database(db_path);
 }
 
-function get_restaurant_list() {
-    let r_list = [];
+// todo convert to using sqlite
 
-    for (r_id in restaurant_data) {
-        r_list.push({
-            id: r_id,
-            name: restaurant_data[r_id].name,
+async function get_restaurant_list() {
+    return new Promise((resolve) => {
+        db.all("SELECT r_id AS id, name FROM restaurants", [], (err, rows) => {
+            resolve(rows);
         });
+    });
+}
+
+async function get_menu(restaurant_id) {
+    let r_data = await new Promise((resolve) => {
+        db.get(
+            "SELECT name, address, cuisine, rating FROM restaurants WHERE r_id = ?",
+            [restaurant_id],
+            (err, row) => {
+                resolve(row);
+            }
+        );
+    });
+
+    console.log(r_data);
+
+    // return false if restaurant is not found
+    if (r_data === undefined) {
+        return false;
     }
 
-    return r_list;
-}
+    let m_items = await new Promise((resolve) => {
+        db.all(
+            "SELECT m_id AS id, name, price, description FROM menu_items WHERE r_id = ?",
+            [restaurant_id],
+            (err, rows) => {
+                resolve(rows);
+            }
+        );
+    });
 
-function get_menu(restaurant_id) {
-    // return empty array if restaurant is not found
-    if (!check_restaurant_exists(restaurant_id)) return false;
+    r_data.menu_items = m_items;
 
-    return restaurant_data[restaurant_id];
+    console.log(r_data);
+
+    return r_data;
 }
 
 function update_menu_item(restaurant_id, menu_item_id, new_menu_item) {
@@ -96,4 +126,4 @@ function update_menu_item(restaurant_id, menu_item_id, new_menu_item) {
     return true;
 }
 
-module.exports = {get_restaurant_list, get_menu};
+module.exports = {initialize_db, get_restaurant_list, get_menu};

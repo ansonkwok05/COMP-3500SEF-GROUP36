@@ -4,6 +4,8 @@ const BODYPARSER = require("body-parser");
 const APP = EXPRESS();
 
 const path = require("path");
+const fs = require("fs");
+const sqlite3 = require("sqlite3");
 
 const UTILS = require("./src/utils.js");
 const USER_MANAGER = require("./src/user_manager.js");
@@ -31,10 +33,10 @@ APP.use(
     })
 );
 
-APP.post("/register", (req, res) => {
+APP.post("/register", async (req, res) => {
     const {email, password, name, address} = req.body;
 
-    if (USER_MANAGER.register_user(email, password, name, address)) {
+    if (await USER_MANAGER.register_user(email, password, name, address)) {
         console.log(
             `Register Success: ${email}, ${password}, ${name}, ${address}`
         );
@@ -47,14 +49,15 @@ APP.post("/register", (req, res) => {
     }
 });
 
-APP.post("/login", (req, res) => {
+APP.post("/login", async (req, res) => {
     const {email, password} = req.body;
 
-    if (USER_MANAGER.login_user(email, password)) {
+    if (await USER_MANAGER.login_user(email, password)) {
         console.log(`Login Success: ${email}, ${password}`);
 
-        // set session userID so user only need to sign in once per session
-        req.session.userID = USER_MANAGER.get_user_id(email);
+        // set session email and userID so user only need to sign in once per session
+        req.session.email = email;
+        req.session.userID = await USER_MANAGER.get_user_id(email);
         res.redirect("/restaurantList/restaurantList.html");
     } else {
         console.log(`Login Fail: ${email}, ${password}`);
@@ -66,10 +69,16 @@ APP.post("/login", (req, res) => {
 });
 
 // check authentication status, block unauthenticated users
-APP.use((req, res, next) => {
+APP.use(async (req, res, next) => {
     if (req.session && req.session.userID) {
         // userID exists, but still need to validate
-        if (USER_MANAGER.validate_user_id(req.session.userID)) return next();
+        if (
+            await USER_MANAGER.validate_user_id(
+                req.session.email,
+                req.session.userID
+            )
+        )
+            return next();
     }
     console.log(`Redirected connection "${req.path}" -> "/login.html"`);
     res.redirect("/login.html");
@@ -91,16 +100,16 @@ APP.get("/restaurants/menu/:id/", (req, res) => {
     res.sendFile(path.join(__dirname, "/protected/menu/menu.html"));
 });
 
-APP.get("/api/restaurants", (req, res) => {
+APP.get("/api/restaurants", async (req, res) => {
     // return list of restaurant
     res.status(200).json({
-        restaurants: RESTAURANT.get_restaurant_list(),
+        restaurants: await RESTAURANT.get_restaurant_list(),
     });
 });
 
-APP.get("/api/restaurants/menu/:id", (req, res) => {
+APP.get("/api/restaurants/menu/:id", async (req, res) => {
     // return menu by restaurant id
-    let menu = RESTAURANT.get_menu(req.params.id);
+    let menu = await RESTAURANT.get_menu(req.params.id);
 
     if (menu === false)
         return res.status(404).json({
@@ -120,21 +129,109 @@ APP.use(
     EXPRESS.static(path.join(__dirname, "/protected/payment"))
 );
 
+APP.get("/logout", (req, res) => {
+    req.session.email = null;
+    req.session.userID = null;
+    res.redirect("/login.html");
+});
+
 // send error page to all unknown route
 APP.use((req, res) => {
     res.status(404).send(ERR_MESSAGE);
 });
 
-function start_app() {
+async function start_app() {
+    // create db folder for storing database files
+    {
+        let db_folder_path = path.join(__dirname, "/db");
+        if (!fs.existsSync(db_folder_path)) {
+            fs.mkdirSync(db_folder_path);
+            console.log("Created db folder");
+        }
+    }
+
+    // initialize sqlite database
+    {
+        let db_path = path.join(__dirname, "/db/data.db");
+        let db = new sqlite3.Database(db_path);
+
+        // initialize database tables
+        db.serialize(() => {
+            db.run(
+                "CREATE TABLE IF NOT EXISTS users (id CHAR(16) PRIMARY KEY NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL, name VARCHAR(255), address VARCHAR(255))"
+            );
+            db.run(
+                "CREATE TABLE IF NOT EXISTS restaurants (r_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255) NOT NULL, address VARCHAR(255), cuisine VARCHAR(30), rating REAL)"
+            );
+            db.run(
+                "CREATE TABLE IF NOT EXISTS menu_items (m_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255), price REAL, description VARCHAR(255), r_id CHAR(16) NOT NULL, FOREIGN KEY (r_id) REFERENCES restaurants (r_id))"
+            );
+        });
+
+        // initialize example data
+        db.serialize(() => {
+            // load test user
+            db.run(
+                `INSERT OR REPLACE INTO users (id, email, password, name, address) VALUES ("AAAAAAAAAAAAAAAA", "test@email", "testtest", "test name", "test address")`
+            );
+
+            // load restaurants
+            let restaurant_prefix =
+                "INSERT OR REPLACE INTO restaurants (r_id, name, address, cuisine, rating)";
+            db.run(
+                `${restaurant_prefix} VALUES ("id1", "McDonald's", "12 Street", "Fast-food", 3.4)`
+            );
+            db.run(
+                `${restaurant_prefix} VALUES ("id2", "KFC", "345 Street", "Fast-food", 3.5)`
+            );
+            db.run(
+                `${restaurant_prefix} VALUES ("id3", "Pizza Hut", "67 Street", "Italian", 3.6)`
+            );
+            db.run(
+                `${restaurant_prefix} VALUES ("id4", "Saizeria", "89 Street", "Italian", 3.7)`
+            );
+
+            // load menu items
+            let menu_items_prefix =
+                "INSERT OR REPLACE INTO menu_items (m_id, name, price, description, r_id)";
+            db.run(
+                `${menu_items_prefix} VALUES ("sdfbhdfgert", "Big Mac", 46, "Burger with patty", "id1")`
+            );
+            db.run(
+                `${menu_items_prefix} VALUES ("dfgsfgd", "McChicken", 35, "Burger with crispy chicken", "id1")`
+            );
+            db.run(
+                `${menu_items_prefix} VALUES ("wtw4t", "Chicken Bucket", 138.9, "6 pieces of crispy chicken", "id2")`
+            );
+            db.run(
+                `${menu_items_prefix} VALUES ("34t4ta4ta", "Chicken Tenders", 82.67, "Chicken strips coated in seasoning", "id2")`
+            );
+            db.run(
+                `${menu_items_prefix} VALUES ("w4tw44", "Pepperoni Supreme Pizza", 199, "Big pepperoni pizza", "id3")`
+            );
+            db.run(
+                `${menu_items_prefix} VALUES ("ertetrateratawe", "Chicken Tenders", 58, "Chicken strips coated in seasoning", "id4")`
+            );
+        });
+
+        db.close(() => {
+            USER_MANAGER.initialize_db(db_path);
+            RESTAURANT.initialize_db(db_path);
+        });
+
+        console.log("SQLite database initialized");
+    }
+
+    // start listening with express
     APP.listen(PORT, (err) => {
         if (err) {
             console.error(
-                `Failed to listen to port -> ${PORT}. Reason: ${err}`
+                `Failed to listen to port -> ${PORT}\n Reason: ${err}`
             );
             return;
         }
 
-        console.log(`Listening at port ${PORT}`);
+        console.log(`Start listening at port ${PORT}`);
     });
 }
 

@@ -1,25 +1,31 @@
+const sqlite3 = require("sqlite3");
+
 const {generate_uuid} = require("./utils.js");
 
-// user data implemented with an object
-// uses email and password for login, user id for logging / authentication purposes
-// todo: change this to a more acceptable way (using a database)
-let user_data = {
-    // test user
-    "test@email": {
-        id: "0123456789ABCDEF",
-        password: "testtest",
-        name: "test name",
-        address: "test address",
-    },
-};
+// sqlite db connection
+// initialized during runtime
+let db;
 
-function check_user_exists(email) {
-    if (email in user_data) return true;
-    return false;
+function initialize_db(db_path) {
+    db = new sqlite3.Database(db_path);
 }
 
-function register_user(email, password, name, address) {
-    if (check_user_exists(email)) return false;
+async function check_user_exists(email) {
+    return new Promise((resolve) => {
+        db.get("SELECT id FROM users WHERE email = ?", [email], (err, row) => {
+            if (row === undefined) {
+                resolve(false);
+                return;
+            }
+
+            resolve(true);
+            return;
+        });
+    });
+}
+
+async function register_user(email, password, name, address) {
+    if (await check_user_exists(email)) return false;
 
     // check if email is invalid
     if (email == "" || email.indexOf("@") == -1) return false;
@@ -30,34 +36,73 @@ function register_user(email, password, name, address) {
     // required information
     if (name == "" || address == "") return false;
 
-    user_data[email] = {
-        id: generate_uuid(16), // use random 16 digit hex for id
-        password: password,
-        name: name,
-        address: address,
-    };
-
-    return true;
+    return new Promise((resolve) => {
+        db.run(
+            `INSERT INTO users (id, email, password, name, address) VALUES (?, ?, ?, ?, ?)`,
+            [generate_uuid(16), email, password, name, address],
+            () => {
+                resolve(true);
+            }
+        );
+    });
 }
 
-function login_user(email, password) {
-    if (!check_user_exists(email)) return false;
+async function login_user(email, password) {
+    return new Promise((resolve) => {
+        db.get(
+            "SELECT password FROM users WHERE email = ?",
+            [email],
+            (err, row) => {
+                if (row === undefined) {
+                    resolve(false);
+                    return;
+                }
 
-    // check if password matches
-    if (user_data[email]?.password != password) return false;
+                if (row.password != password) {
+                    resolve(false);
+                    return;
+                }
 
-    return true;
+                resolve(true);
+            }
+        );
+    });
 }
 
-function get_user_id(email) {
-    return user_data[email].id;
+async function get_user_id(email) {
+    return new Promise((resolve) => {
+        db.get("SELECT id FROM users WHERE email = ?", [email], (err, row) => {
+            resolve(row.id);
+        });
+    });
 }
 
-function validate_user_id(user_id) {
-    for (email in user_data) {
-        if (user_data[email].id == user_id) return true;
-    }
-    return false;
+async function validate_user_id(email, user_id) {
+    return new Promise((resolve) => {
+        db.get(
+            "SELECT email FROM users WHERE id = ?",
+            [user_id],
+            (err, row) => {
+                if (row === undefined) {
+                    resolve(false);
+                    return;
+                }
+
+                if (row.email != email) {
+                    resolve(false);
+                    return;
+                }
+
+                resolve(true);
+            }
+        );
+    });
 }
 
-module.exports = {register_user, login_user, get_user_id, validate_user_id};
+module.exports = {
+    initialize_db,
+    register_user,
+    login_user,
+    get_user_id,
+    validate_user_id,
+};
