@@ -115,6 +115,11 @@ APP.use(
     EXPRESS.static(path.join(__dirname, "/protected/order_tracking"))
 );
 
+APP.use(
+    "/payment/",
+    EXPRESS.static(path.join(__dirname, "/protected/payment"))
+);
+
 // send error page to all unknown route
 APP.use((req, res) => {
     res.status(404).send(ERR_MESSAGE);
