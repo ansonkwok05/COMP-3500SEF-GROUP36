@@ -12,12 +12,12 @@ const RESTAURANT = require("./src/restaurant.js");
 const PORT = process.env.PORT || 8080;
 const ERR_MESSAGE = "404 Page not found";
 
-// expose ./auth folder, which both authorized and unauthorized people can access
-APP.use(EXPRESS.static("./auth"));
+// expose ./public folder, which everyone can access
+APP.use(EXPRESS.static("./public"));
 
 APP.use(BODYPARSER.urlencoded({extended: true}));
 
-// session for authorization after user log in
+// session for authentication after user log in
 APP.use(
     SESSION({
         secret: process.env.SESSION_SECRET || UTILS.generate_uuid(16),
@@ -75,18 +75,20 @@ APP.use((req, res, next) => {
     res.redirect("/login.html");
 });
 
+// only logged in users can access under this
+
 APP.use(
     "/restaurantList/",
-    EXPRESS.static(path.join(__dirname, "/public/restaurantList"))
+    EXPRESS.static(path.join(__dirname, "/protected/restaurantList"))
 );
 
 APP.use(
     "/restaurants/menu/",
-    EXPRESS.static(path.join(__dirname, "/public/menu"))
+    EXPRESS.static(path.join(__dirname, "/protected/menu"))
 );
 
 APP.get("/restaurants/menu/:id/", (req, res) => {
-    res.sendFile(path.join(__dirname, "/public/menu/menu.html"));
+    res.sendFile(path.join(__dirname, "/protected/menu/menu.html"));
 });
 
 APP.get("/api/restaurants", (req, res) => {
@@ -110,7 +112,7 @@ APP.get("/api/restaurants/menu/:id", (req, res) => {
 
 APP.use(
     "/order_tracking/",
-    EXPRESS.static(path.join(__dirname, "/public/order_tracking"))
+    EXPRESS.static(path.join(__dirname, "/protected/order_tracking"))
 );
 
 // send error page to all unknown route
@@ -118,6 +120,17 @@ APP.use((req, res) => {
     res.status(404).send(ERR_MESSAGE);
 });
 
-APP.listen(PORT, () => {
-    console.log(`Listening at port ${PORT}`);
-});
+function start_app() {
+    APP.listen(PORT, (err) => {
+        if (err) {
+            console.error(
+                `Failed to listen to port -> ${PORT}. Reason: ${err}`
+            );
+            return;
+        }
+
+        console.log(`Listening at port ${PORT}`);
+    });
+}
+
+start_app();
