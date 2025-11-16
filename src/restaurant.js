@@ -97,8 +97,6 @@ async function get_menu(restaurant_id) {
         );
     });
 
-    console.log(r_data);
-
     // return false if restaurant is not found
     if (r_data === undefined) {
         return false;
@@ -115,8 +113,6 @@ async function get_menu(restaurant_id) {
     });
 
     r_data.menu_items = m_items;
-
-    console.log(r_data);
 
     return r_data;
 }
