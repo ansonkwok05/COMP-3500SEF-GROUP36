@@ -24,3 +24,25 @@ fetch("/api/restaurants")
         )[0].innerHTML = r_list;
     })
     .catch((error) => console.error("Error fetching data:", error));
+
+document.getElementById("logout").addEventListener("click", function (e) {
+    e.preventDefault();
+    fetch("/logout", {
+        method: "GET",
+        credentials: "include" 
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else if (response.ok) {
+            window.location.href = "/login.html";
+        } else {
+            alert("Logout failed. Please try again.");
+        }
+    })
+    .catch(err => {
+        console.error("Logout error:", err);
+        alert("Network error during logout");
+    });
+});
+
