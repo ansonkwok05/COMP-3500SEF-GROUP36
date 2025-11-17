@@ -1,11 +1,13 @@
-@media only screen and (min-width:600px){
-body {
+/*Mobile size*/
+
+@media only screen and (max-width:430px)and (min-width:320px){
+  
+ body {
   overflow: auto;
 }
 .bottom-navi-bar {
   position: fixed;
   bottom: 0;
-  left: 0;
   width: 100%;
   display: flex;
   justify-content: space-around;
@@ -13,12 +15,12 @@ body {
   background-color: #fff;
   border-top: 1px solid #eee;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  height: 20%;
+  height: 15%;
   z-index: 1000;
   font-size: 100%;
 }
 .nav-item {
-  font-size: 3em;
+  font-size: 2em;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -26,8 +28,98 @@ body {
   color: #333;
 }
 
-.nav-item img {
-  font-size: 1em;
+.nav-item h1 {
+  font-size: 30px;
+  margin-bottom: 4px;
+}
+.menu-item-container {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 85%;
+  border-top-left-radius: 50px;
+  border-top-right-radius: 50px;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto; 
+}
+
+.menu-item {
+  display: grid;
+  grid-template-areas: 
+  "title  img "
+  "desc  img "
+  "price img ";
+  /*grid-template-columns: 1fr auto minmax(150px, auto); /* Added this to define column widths; adjust as needed */
+  position: static;
+  height: 42%;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+  align-self: center;
+  border-bottom: 1px solid #eee;
+  border-top-style: hidden;
+  
+}
+.menu-item div{
+  padding: 3px;
+}
+.menu-item-img{
+  grid-area: img;
+}
+.menu-item-title{
+  grid-area:title;
+}
+.menu-item-desc{
+  grid-area: desc;
+}
+.menu-item-price{
+  grid-area: price;
+}
+.menu-item-img img{
+  border-radius: 8px;
+  width: 250px; 
+  height: auto; 
+  max-width: 300px
+
+}
+.spaceholder{
+  width: 100%;
+  height: 15%;
+  position:fixed;
+  bottom:0;
+}
+}
+
+/*Desktop size*/
+@media only screen and (min-width:1201px){
+.bottom-navi-bar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    height: 10%;
+    z-index: 1000;
+    font-size: 100%;
+    }
+
+
+.nav-item {
+  font-size: 2.5em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+}
+
+.nav-item h1 {
+  font-size: 30px;
   margin-bottom: 4px;
 }
 
@@ -89,15 +181,12 @@ body {
 
 }
 }
-@media only screen and (max-width:600px){
-  
- body {
-  overflow: auto;
-}
-.bottom-navi-bar {
+
+/*tablet and small desktop size*/
+@media only screen and (min-width:430px) and (max-width:1200px){
+  .bottom-navi-bar {
   position: fixed;
   bottom: 0;
-  left: 0;
   width: 100%;
   display: flex;
   justify-content: space-around;
@@ -105,12 +194,12 @@ body {
   background-color: #fff;
   border-top: 1px solid #eee;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  height: 20%;
+  height: 15%;
   z-index: 1000;
   font-size: 100%;
 }
 .nav-item {
-  font-size: 3em;
+  font-size: 2.5em;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -118,9 +207,22 @@ body {
   color: #333;
 }
 
-.nav-item img {
+.nav-item h1 {
   font-size: 1em;
   margin-bottom: 4px;
+}
+
+.top-title {
+  height: 10%;
+  width: 100%;
+  position:sticky;
+  top:0;
+  border-bottom: #333 1px solid;
+}
+.top-title h1 {
+  text-align: center;
+  font-size: 2em;
+  margin: 10px 0;
 }
 
 .menu-item-container {
@@ -137,21 +239,15 @@ body {
   overflow-y: auto; 
 }
 
-#Title {
-  text-align: center;
-  top: 10px; 
-  font-size: 4em;
-  position: absolute; 
-}
 .menu-item {
   display: grid;
   grid-template-areas: 
   "title  img "
   "desc  img "
   "price img ";
-  /*grid-template-columns: 1fr auto minmax(150px, auto); /* Added this to define column widths; adjust as needed */
+  grid-template-columns: 1fr auto minmax(150px, auto); /* Added this to define column widths; adjust as needed */
   position: static;
-  height: 42%;
+  height: 30%;
   box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
   align-self: center;
   border-bottom: 1px solid #eee;
@@ -175,9 +271,10 @@ body {
 }
 .menu-item-img img{
   border-radius: 8px;
-  width: 250px; 
+  width: 20vw; 
   height: auto; 
   max-width: 300px
 
 }
+
 }
