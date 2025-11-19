@@ -3,7 +3,7 @@ fetch("/api/restaurants")
     if (!res.ok) throw new Error("Network error");
     return res.json();
   })
-  .then(data => {                              // ← Fixed: was "json", now "data"
+  .then(data => {                             
     if (!data?.restaurants || data.restaurants.length === 0) {
       document.querySelector(".restaurantListContainer").innerHTML = 
         '<p class="no-data">No restaurants available</p>';
@@ -43,14 +43,14 @@ fetch("/api/restaurants")
       '<p class="no-data">Failed to load restaurants</p>';
   });
 
-// Simple XSS protection
+
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
 
-// Logout
+
 document.getElementById("logout").addEventListener("click", function (e) {
   e.preventDefault();
   fetch("/logout", { credentials: "include" })

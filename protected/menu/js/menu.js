@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = items.map(item => {
                 const imageUrl = item.image && item.image.trim() !== '' 
                     ? item.image 
-                    : '/images/placeholder-food.jpg';   // your fallback image
+                    : '/images/placeholder-food.jpg';   
 
                 return `
                     <div class="menu-item" data-id="${item.id || ''}">
@@ -59,14 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 });
 
-// Prevent XSS
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Add to cart (unchanged)
 function addToCart(button) {
     const item = button.closest('.menu-item');
     const title = item.querySelector('.item-title').textContent;

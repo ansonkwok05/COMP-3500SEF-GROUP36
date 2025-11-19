@@ -7,7 +7,7 @@ body {
     padding-bottom: 90px;
 }
 
-/* 固定頂部標題 */
+
 .top-header {
     position: sticky;
     top: 0;
@@ -24,7 +24,7 @@ body {
     color: #e74c3c;
 }
 
-/* 餐廳列表容器 */
+
 .restaurantListContainer {
     padding: 20px 16px;
     display: flex;
@@ -34,7 +34,7 @@ body {
     margin: 0 auto;
 }
 
-/* 單個餐廳卡片 */
+
 .restaurant-item {
     display: block;
     background: white;
@@ -85,7 +85,7 @@ body {
     color: #7f8c8d;
 }
 
-/* 底部導航列（跟 Menu 頁完全一致） */
+
 .bottom-navi-bar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -116,7 +116,7 @@ body {
 .nav-item .icon { font-size: 1.6rem; margin-bottom: 4px; }
 .nav-item:hover, .nav-item.active { color: #e74c3c; transform: scale(1.1); }
 
-/* 平板 & 電腦 */
+
 @media (min-width: 768px) {
     .restaurantListContainer { padding: 30px 40px; }
     .restaurant-img { width: 130px; height: 130px; }
