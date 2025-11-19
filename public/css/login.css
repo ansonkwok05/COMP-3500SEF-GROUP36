@@ -103,3 +103,15 @@ body {
 #main_container #login_button:hover {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
+
+/* for small/vertical devices */
+@media screen and (max-width: 768px) {
+    #login_container {
+        max-width: 800px;
+        max-height: 800px;
+    }
+
+    #login_container #main_container {
+        width: 80%;
+    }
+}
