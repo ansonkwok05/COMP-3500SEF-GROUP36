@@ -1,48 +1,62 @@
 fetch("/api/restaurants")
-    .then((res) => {
-        if (!res.ok) {
-            throw new Error(`HTTP error! Status: ${res.status}`);
-        }
-        return res.json();
-    })
-    .then((json) => {
-        if (!json || !Array.isArray(json.restaurants)) {
-            console.error("Invalid data structure:", json);
-            return; // Or handle/display an error message
-        }
+  .then(res => {
+    if (!res.ok) throw new Error("Network error");
+    return res.json();
+  })
+  .then(data => {                              // ← Fixed: was "json", now "data"
+    if (!data?.restaurants || data.restaurants.length === 0) {
+      document.querySelector(".restaurantListContainer").innerHTML = 
+        '<p class="no-data">No restaurants available</p>';
+      return;
+    }
 
-        let r_list = "";
+    const container = document.querySelector(".restaurantListContainer");
 
-        json.restaurants.forEach((restaurant) => {
-            r_list += `<a href="/restaurants/menu/${restaurant.id}">`;
-            r_list += `<div class="restaurant-item"><h2>${restaurant.name}</h2></div>`;
-            r_list += `</a>`;
-        });
+    container.innerHTML = data.restaurants.map(r => {
+      const imgUrl = r.image && r.image.trim() ? r.image : "";
 
-        document.getElementsByClassName(
-            "restaurantListContainer"
-        )[0].innerHTML = r_list;
-    })
-    .catch((error) => console.error("Error fetching data:", error));
+      return `
+        <a href="/restaurants/menu/${r.id}" class="restaurant-item">
+          <div class="restaurant-card">
+            <div class="restaurant-img">
+              ${imgUrl ? 
+                `<img src="${imgUrl}" alt="${escapeHtml(r.name)}" 
+                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : 
+                ''
+              }
+              <div class="placeholder">
+                <span>Restaurant</span>
+              </div>
+            </div>
+            <div class="restaurant-info">
+              <h2>${escapeHtml(r.name)}</h2>
+              <p>${escapeHtml(r.cuisine || 'Various cuisine')} • ${r.distance || 'Nearby'}</p>
+            </div>
+          </div>
+        </a>
+      `;
+    }).join('');
+  })
+  .catch(err => {
+    console.error("Fetch error:", err);
+    document.querySelector(".restaurantListContainer").innerHTML = 
+      '<p class="no-data">Failed to load restaurants</p>';
+  });
 
+// Simple XSS protection
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Logout
 document.getElementById("logout").addEventListener("click", function (e) {
-    e.preventDefault();
-    fetch("/logout", {
-        method: "GET",
-        credentials: "include" 
+  e.preventDefault();
+  fetch("/logout", { credentials: "include" })
+    .then(res => {
+      if (res.redirected) window.location = res.url;
+      else window.location = "/login.html";
     })
-    .then(response => {
-        if (response.redirected) {
-            window.location.href = response.url;
-        } else if (response.ok) {
-            window.location.href = "/login.html";
-        } else {
-            alert("Logout failed. Please try again.");
-        }
-    })
-    .catch(err => {
-        console.error("Logout error:", err);
-        alert("Network error during logout");
-    });
+    .catch(() => alert("Logout failed"));
 });
-

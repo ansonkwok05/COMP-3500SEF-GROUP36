@@ -1,116 +1,152 @@
-/*tablet and small desktop size*/
-@media only screen and (min-width:430px) and (max-width:1200px){
-  .bottom-navi-bar {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color: #fff;
-  border-top: 1px solid #eee;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  height: 15%;
-  z-index: 1000;
-  font-size: 100%;
-}
-.nav-item {
-  font-size: 2.5em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  color: #333;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #fffaf0;
+    min-height: 100vh;
+    padding-bottom: 90px;
 }
 
-.nav-item h1 {
-  font-size: 1em;
-  margin-bottom: 4px;
+/* 固定頂部標題 */
+.top-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 18px 0;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    z-index: 999;
+    backdrop-filter: blur(10px);
+}
+.top-header h1 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #e74c3c;
 }
 
-.top-title {
-  height: 10%;
-  width: 100%;
-  position:sticky;
-  top:0;
-  border-bottom: #333 1px solid;
-}
-.top-title h1 {
-  text-align: center;
-  font-size: 2em;
-  margin: 10px 0;
-}
+/* 餐廳列表容器 */
 .restaurantListContainer {
-  height: 75%;
-  overflow-y: auto;
-  width: 100%;
-}
-}
-/*mobile size*/
-@media only screen and (max-width:430px)and (min-width:320px){
-  
- body {
-  overflow: auto;
-}
-.bottom-navi-bar {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color: #fff;
-  border-top: 1px solid #eee;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  height: 15%;
-  z-index: 1000;
-  font-size: 100%;
-}
-.nav-item {
-  font-size: 2em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  color: #333;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-.nav-item h1 {
-  font-size: 30px;
-  margin-bottom: 4px;
+/* 單個餐廳卡片 */
+.restaurant-item {
+    display: block;
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    text-decoration: none;
 }
 
+.restaurant-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 18px 40px rgba(231, 76, 60, 0.2);
 }
 
-/*Desktop size*/
-@media only screen and (min-width:1201px){
+.restaurant-card {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 16px;
+}
+
+.restaurant-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 18px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f0f0f0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.restaurant-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.restaurant-info h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+
+.restaurant-info p {
+    font-size: 0.95rem;
+    color: #7f8c8d;
+}
+
+/* 底部導航列（跟 Menu 頁完全一致） */
 .bottom-navi-bar {
     position: fixed;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background-color: #fff;
+    bottom: 0; left: 0; right: 0;
+    height: 78px;
+    background: white;
     border-top: 1px solid #eee;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    height: 10%;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.12);
+    display: flex;
     z-index: 1000;
-    font-size: 100%;
-    }
-
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    overflow: hidden;
+}
 
 .nav-item {
-  font-size: 2.5em;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #95a5a6;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+.nav-item .icon { font-size: 1.6rem; margin-bottom: 4px; }
+.nav-item:hover, .nav-item.active { color: #e74c3c; transform: scale(1.1); }
+
+/* 平板 & 電腦 */
+@media (min-width: 768px) {
+    .restaurantListContainer { padding: 30px 40px; }
+    .restaurant-img { width: 130px; height: 130px; }
+}
+@media (min-width: 1024px) {
+    .restaurantListContainer {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+        gap: 28px;
+        padding: 40px 60px;
+    }
+}
+.restaurant-img .placeholder {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-decoration: none;
-  color: #333;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+  border-radius: 18px;
+  color: #bbb;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px;
+  line-height: 1.3;
 }
 
-.nav-item h1 {
-  font-size: 30px;
-  margin-bottom: 4px;
-}
+.restaurant-info p {
+  color: #e74c3c;
+  font-weight: 500;
+  margin-top: 4px;
 }

@@ -80,7 +80,7 @@ function initialize_db(db_path) {
 
 async function get_restaurant_list() {
     return new Promise((resolve) => {
-        db.all("SELECT r_id AS id, name FROM restaurants", [], (err, rows) => {
+        db.all("SELECT r_id AS id, name, cuisine FROM restaurants", [], (err, rows) => {
             resolve(rows);
         });
     });

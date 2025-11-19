@@ -2,51 +2,85 @@ document.addEventListener('DOMContentLoaded', () => {
     const pathElement = window.location.pathname.split('/');
     const restaurantID = pathElement[pathElement.length - 1];
 
-    if (restaurantID !== '') {
-        fetch(`/api/restaurants/menu/${restaurantID}`)
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! Status: ${res.status}`);
-                }
-                return res.json();
-            })
-            .then((json) => {
-                console.log("API Response:", json); // Debug log
-                if (!json || !json.menu_items) {
-                    console.error("Invalid data structure or missing menu_items:", json);
-                    document.getElementsByClassName("menu-item-container")[0].innerHTML = '<p>Error: No menu items available.</p>';
-                    return;
-                }
-
-                // Convert menu_items object to an array of values
-                const menuItemsArray = Object.values(json.menu_items);
-
-                let menu_item = "";
-
-                menuItemsArray.forEach((item) => {
-                    menu_item += `<div class="menu-item">`;
-                    menu_item += `<div class="menu-item-title"><h1>${item.name || 'Unnamed Item'}</h1></div>`;
-                    menu_item += `<div class="menu-item-desc"><h2>${item.description || 'No description'}</h2></div>`;
-                    menu_item += `<div class="menu-item-price"><h2>$${item.price || 0}</h2></div>`;
-                    menu_item += `</div>`;
-                });
-
-                const container = document.getElementsByClassName("menu-item-container")[0];
-                if (container) {
-                    container.innerHTML = menu_item || '<p>No menu items available.</p>';
-                } else {
-                    console.error("Menu container not found in HTML");
-                }
-            })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-                const container = document.getElementsByClassName("menu-item-container")[0];
-                if (container) {
-                    container.innerHTML = '<p>Error loading menu. Please try again later.</p>';
-                }
-            });
-    } else {
-        console.error("No restaurant ID found in URL");
-        document.getElementsByClassName("menu-item-container")[0].innerHTML = '<p>No restaurant selected.</p>';
+    if (!restaurantID || restaurantID === '') {
+        document.querySelector(".menu-item-container").innerHTML = 
+            '<p class="text-center text-gray-600 py-10">No restaurant selected.</p>';
+        return;
     }
+
+    fetch(`/api/restaurants/menu/${restaurantID}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Network error');
+            return res.json();
+        })
+        .then(json => {
+            if (!json?.menu_items || Object.keys(json.menu_items).length === 0) {
+                document.querySelector(".menu-item-container").innerHTML = 
+                    '<p class="text-center text-gray-600 py-10">This restaurant has no menu items yet.</p>';
+                return;
+            }
+
+            const items = Object.values(json.menu_items);
+            const container = document.querySelector(".menu-item-container");
+
+            container.innerHTML = items.map(item => {
+                const imageUrl = item.image && item.image.trim() !== '' 
+                    ? item.image 
+                    : '/images/placeholder-food.jpg';   // your fallback image
+
+                return `
+                    <div class="menu-item" data-id="${item.id || ''}">
+                        <div class="item-info">
+                            <h3 class="item-title">${escapeHtml(item.name || 'Unnamed Item')}</h3>
+                            <p class="item-desc">${escapeHtml(item.description || 'No description')}</p>
+                            <div class="item-bottom">
+                                <span class="item-price">$${Number(item.price || 0).toFixed(2)}</span>
+                                <button class="add-btn" onclick="addToCart(this)">Add</button>
+                            </div>
+                        </div>
+                        <div class="item-image">
+                            <img src="${imageUrl}"
+                                 alt="${escapeHtml(item.name || 'Food item')}"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                 onload="this.style.display='block';">
+                            <!-- Fallback icon when image fails or is missing -->
+                            <div class="image-placeholder">
+                                Plate
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        })
+        .catch(err => {
+            console.error(err);
+            document.querySelector(".menu-item-container").innerHTML = 
+                '<p class="text-center text-red-600 py-10">Failed to load menu.</p>';
+        });
 });
+
+// Prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Add to cart (unchanged)
+function addToCart(button) {
+    const item = button.closest('.menu-item');
+    const title = item.querySelector('.item-title').textContent;
+    const price = item.querySelector('.item-price').textContent;
+
+    button.textContent = 'Added';
+    button.style.backgroundColor = '#27ae60';
+    button.disabled = true;
+
+    console.log('Added to cart:', { title, price });
+
+    setTimeout(() => {
+        button.textContent = 'Add';
+        button.style.backgroundColor = '#e74c3c';
+        button.disabled = false;
+    }, 1500);
+}
