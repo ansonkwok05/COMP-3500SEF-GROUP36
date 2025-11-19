@@ -85,13 +85,21 @@ body {
     user-select: none;
     cursor: pointer;
 
+    color: white;
     text-align: center;
     font-size: 18px;
+    font-family: monospace;
 
     padding: 20px;
     padding-left: 32px;
     padding-right: 32px;
     border-radius: 8px;
 
-    background: linear-gradient(to bottom right, orange, rgba(255, 166, 0, 0.67));
+    background: #e74c3c;
+
+    transition: box-shadow 0.2s;
+}
+
+#main_container #login_button:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
