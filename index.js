@@ -10,6 +10,7 @@ const sqlite3 = require("sqlite3");
 const UTILS = require("./src/utils.js");
 const USER_MANAGER = require("./src/user_manager.js");
 const RESTAURANT = require("./src/restaurant.js");
+const CART_MANAGER = require("./src/cart_manager.js");
 
 const PORT = process.env.PORT || 8080;
 const ERR_MESSAGE = "404 Page not found";
@@ -17,7 +18,7 @@ const ERR_MESSAGE = "404 Page not found";
 // expose ./public folder, which everyone can access
 APP.use(EXPRESS.static("./public"));
 
-APP.use(BODYPARSER.urlencoded({extended: true}));
+APP.use(BODYPARSER.urlencoded({ extended: true }));
 
 // session for authentication after user log in
 APP.use(
@@ -34,7 +35,7 @@ APP.use(
 );
 
 APP.post("/register", async (req, res) => {
-    const {email, password, name, address} = req.body;
+    const { email, password, name, address } = req.body;
 
     if (await USER_MANAGER.register_user(email, password, name, address)) {
         console.log(
@@ -50,7 +51,7 @@ APP.post("/register", async (req, res) => {
 });
 
 APP.post("/login", async (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     if (await USER_MANAGER.login_user(email, password)) {
         console.log(`Login Success: ${email}, ${password}`);
@@ -119,6 +120,46 @@ APP.get("/api/restaurants/menu/:id", async (req, res) => {
     res.status(200).json(menu);
 });
 
+APP.get("/api/cart", async (req, res) => {
+    // return an array containing all the cart items
+    // contains: menu item id, quantity, name, price, description
+    res.status(200).json({
+        items: await CART_MANAGER.get_cart(await USER_MANAGER.get_user_id(req.session.email))
+    })
+})
+
+APP.post("/api/cart/add/:id", async (req, res) => {
+    // add 1 of the menu item to cart
+    // takes menu item id as argument, return the new quantity of that menu item in cart
+    res.status(200).json({
+        quantity: await CART_MANAGER.add_to_cart(await USER_MANAGER.get_user_id(req.session.email), req.params.id)
+    });
+})
+
+APP.post("/api/cart/change/:id/:quantity", async (req, res) => {
+    // change the quantity of one of the cart items
+    // takes menu item id as argument, return the new quantity of that menu item in cart
+    res.status(200).json({
+        quantity: await CART_MANAGER.change_item_amount(await USER_MANAGER.get_user_id(req.session.email), req.params.id, req.params.quantity)
+    });
+})
+
+APP.delete("/api/cart/remove/:id", async (req, res) => {
+    // remove a specific menu item from cart
+    // takes menu item id as argument, return true
+    res.status(200).json({
+        removed: await CART_MANAGER.remove_from_cart(await USER_MANAGER.get_user_id(req.session.email), req.params.id)
+    });
+})
+
+APP.delete("/api/cart/clear", async (req, res) => {
+    // remove a specific menu item from cart
+    // takes menu item id as argument, return true
+    res.status(200).json({
+        cleared: await CART_MANAGER.clear_cart(await USER_MANAGER.get_user_id(req.session.email))
+    });
+})
+
 APP.use(
     "/order_tracking/",
     EXPRESS.static(path.join(__dirname, "/protected/order_tracking"))
@@ -165,6 +206,9 @@ async function start_app() {
             );
             db.run(
                 "CREATE TABLE IF NOT EXISTS menu_items (m_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255), price REAL, description VARCHAR(255), r_id CHAR(16) NOT NULL, FOREIGN KEY (r_id) REFERENCES restaurants (r_id))"
+            );
+            db.run(
+                "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL UNIQUE, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
             );
         });
 
@@ -214,16 +258,21 @@ async function start_app() {
             );
         });
 
-        db.close(() => {
-            USER_MANAGER.initialize_db(db_path);
-            RESTAURANT.initialize_db(db_path);
-        });
+        await new Promise(resolve => {
+            db.close(() => {
+                USER_MANAGER.initialize_db(db_path);
+                RESTAURANT.initialize_db(db_path);
+                CART_MANAGER.initialize_db(db_path);
+
+                resolve();
+            });
+        })
 
         console.log("SQLite database initialized");
     }
 
     // start listening with express
-    APP.listen(PORT, (err) => {
+    APP.listen(PORT, async (err) => {
         if (err) {
             console.error(
                 `Failed to listen to port -> ${PORT}\n Reason: ${err}`
@@ -232,6 +281,7 @@ async function start_app() {
         }
 
         console.log(`Start listening at port ${PORT}`);
+        console.log();
     });
 }
 
