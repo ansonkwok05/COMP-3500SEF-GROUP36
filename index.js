@@ -136,7 +136,7 @@ APP.post("/api/cart/add/:id", async (req, res) => {
     });
 })
 
-APP.post("/api/cart/change/:id/:quantity", async (req, res) => {
+APP.put("/api/cart/change/:id/:quantity", async (req, res) => {
     // change the quantity of one of the cart items
     // takes menu item id as argument, return the new quantity of that menu item in cart
     res.status(200).json({
