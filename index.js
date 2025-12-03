@@ -89,6 +89,52 @@ APP.use(async (req, res, next) => {
     res.redirect("/login.html");
 });
 
+//Deliveryman register
+APP.post("/deli_register", async (req, res) => {
+    const { email, password, name, address } = req.body;
+
+    // forcely check end
+    if (!email || !email.endsWith("@delivery")) {
+        return res.status(400).send("Email must end with @delivery");
+    }
+
+    if (!password || password.length < 8) {
+        return res.status(400).send("Password must be at least 8 characters");
+    }
+
+    const success = await USER_MANAGER.register_user(email, password, name, address);
+    
+    if (success) {
+    res.status(200).send("Deliveryman account created successfully!");
+} else {
+    // check for different error
+    const existingUser = await USER_MANAGER.get_user_by_email(email);
+    if (existingUser) {
+        res.status(400).send("This email is already registered");
+    } else {
+        res.status(500).send("Registration failed. Please try again later.");
+    }
+}
+});
+
+//Deliveryman Login
+APP.post("/deli_login", async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email.endsWith("@delivery")) {
+        return res.status(403).send("This is deliveryman login only");
+    }
+
+    if (await USER_MANAGER.login_user(email, password)) {
+        req.session.email = email;
+        req.session.userID = await USER_MANAGER.get_user_id(email);
+        req.session.isDelivery = true;
+        res.redirect("/protected/DeliTakeOrder/TakeOrder.html");
+    } else {
+        res.status(401).send("Incorrect password");
+    }
+});
+
 // only logged in users can access under this
 
 APP.use(
