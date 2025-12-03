@@ -1,16 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu</title>
     <link rel="stylesheet" href="css/Menu.css">
 </head>
+
 <body>
 
     <header class="top-header">
         <h1>Menu</h1>
+        <div id="shopping_cart">🛒</div>
     </header>
+
+    <div id="cart-overlay"></div>
+
+    <div id="cart-container">
+        <button id="cart-close">x</button>
+        <h2>Your Cart</h2>
+        <div class="cart-items">
+            <p class="cart-empty">Your cart is empty</p>
+        </div>
+        <div class="cart-total">Total: $0.00</div>
+        <button class="checkout-btn">Proceed to Checkout</button>
+    </div>
 
     <main class="menu-item-container">
         <!-- JS will fill this -->
@@ -33,4 +48,5 @@
 
     <script src="js/menu.js"></script>
 </body>
+
 </html>
