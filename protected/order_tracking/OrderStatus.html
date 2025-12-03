@@ -1,28 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrderStatus</title>
-    <script type="module">
-        import { OrderStateMachine } from './StateMachine.js';
-        // for test init
-        //window.osm = new OrderStateMachine();
-        //osm.changeStateCreated(true);
-
-        var list = osm.getCurrentState()
-        document.getElementById('create').textContent           = list[0];
-        document.getElementById('OrderAccept').textContent      = list[1];
-        document.getElementById('FoodPrepare').textContent      = list[2];
-        document.getElementById('RiderAccept').textContent      = list[3];
-        document.getElementById('Delivery').textContent         = list[4];
-        document.getElementById('OrderFinish').textContent      = list[5];
-        document.getElementById('Cancel').textContent           = list[6];
-        if(list[0] == "Created: you dont have order"){
-             document.getElementById('orderId').textContent     = "";
-        }
-
-    </script>
+    <title>Order Status</title>
+    <script src="StateMachine.js"></script>
 </head>
 <body>
     <div id="app">
@@ -36,5 +16,67 @@
         <h2 id="OrderFinish"></h2>
         <h2 id="Cancel"></h2>
     </div>
+
+    <script>
+        const elements = {
+            orderId: document.getElementById('orderId'),
+            create: document.getElementById('create'),
+            OrderAccept: document.getElementById('OrderAccept'),
+            FoodPrepare: document.getElementById('FoodPrepare'),
+            RiderAccept: document.getElementById('RiderAccept'),
+            Delivery: document.getElementById('Delivery'),
+            OrderFinish: document.getElementById('OrderFinish'),
+            Cancel: document.getElementById('Cancel')
+        };
+
+        function updateDisplay() {
+            const state = window.osm.State;
+            const dates = window.osm.StateDates;
+
+            // update order ID
+            elements.orderId.textContent = "OrderID: " + state.OrderID;
+
+            // update all states
+            updateStateElement('create', 'Created', state, dates);
+            updateStateElement('OrderAccept', 'OrderAccept', state, dates);
+            updateStateElement('FoodPrepare', 'FoodPrepare', state, dates);
+            updateStateElement('RiderAccept', 'RiderAccept', state, dates);
+            updateStateElement('Delivery', 'Delivery', state, dates);
+            updateStateElement('OrderFinish', 'OrderFinish', state, dates);
+
+            // update cancel status
+            if (state.Cancel === 'cancelled') {
+                elements.Cancel.textContent = "Cancel: cancelled";
+            } else {
+                elements.Cancel.textContent = "Cancel: ";
+            }
+        }
+
+        function updateStateElement(elementId, stateKey, state, dates) {
+            const element = elements[elementId];
+
+            if (state[stateKey] === 'finish') {
+                element.textContent = stateKey + ": finish (" + dates[stateKey] + ")";
+            } else if (state[stateKey] === 'cancelled') {
+                element.textContent = stateKey + ": cancelled";
+            } else if (state[stateKey] === '') {
+                element.textContent = stateKey + ": ";
+            } else if (state[stateKey] === 'you dont have order') {
+                element.textContent = stateKey + ": you dont have order";
+            } else {
+                element.textContent = stateKey + ": " + state[stateKey];
+            }
+        }
+
+        // show status when page loads
+        window.onload = function() {
+            updateDisplay();
+        };
+
+        // listen for status changes
+        window.osm.onStateUpdate(function(state, dates) {
+            updateDisplay();
+        });
+    </script>
 </body>
 </html>
