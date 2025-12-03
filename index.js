@@ -87,18 +87,18 @@ APP.post("/deli_register", async (req, res) => {
     }
 
     const success = await USER_MANAGER.register_user(email, password, name, address);
-    
+
     if (success) {
-    res.status(200).send("Deliveryman account created successfully!");
-} else {
-    // check for different error
-    const existingUser = await USER_MANAGER.get_user_by_email(email);
-    if (existingUser) {
-        res.status(400).send("This email is already registered");
+        res.status(200).send("Deliveryman account created successfully!");
     } else {
-        res.status(500).send("Registration failed. Please try again later.");
+        // check for different error
+        const existingUser = await USER_MANAGER.get_user_by_email(email);
+        if (existingUser) {
+            res.status(400).send("This email is already registered");
+        } else {
+            res.status(500).send("Registration failed. Please try again later.");
+        }
     }
-}
 });
 
 //Deliveryman Login
@@ -114,10 +114,10 @@ APP.post("/deli_login", async (req, res) => {
 
         req.session.email = email;
         req.session.userID = await USER_MANAGER.get_user_id(email);
-        req.session.isDelivery = true; 
+        req.session.isDelivery = true;
 
         res.redirect("/protected/DeliTakeOrder/TakeOrder.html");
-		
+
     } else {
         console.log(`Deliveryman Login Failed: ${email}`);
         res.status(401).send("Incorrect password");
@@ -263,7 +263,7 @@ async function start_app() {
                 "CREATE TABLE IF NOT EXISTS menu_items (m_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255), price REAL, description VARCHAR(255), r_id CHAR(16) NOT NULL, FOREIGN KEY (r_id) REFERENCES restaurants (r_id))"
             );
             db.run(
-                "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL UNIQUE, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
+                "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
             );
         });
 

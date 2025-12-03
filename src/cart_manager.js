@@ -20,6 +20,11 @@ async function get_cart(user_id) {
     let cart_items = [];
 
     return new Promise(resolve => {
+        if (cart_list.length == 0) {
+            resolve(cart_items);
+            return;
+        }
+
         cart_list.forEach(async item => {
             let item_description = await new Promise(resolve => {
                 db.get("SELECT name, price, description FROM menu_items WHERE m_id = ?", [item.m_id], (err, row) => {
@@ -54,7 +59,8 @@ async function add_to_cart(user_id, menu_item_id) {
         return new Promise(resolve => {
             db.run("INSERT INTO cart_items (c_id, u_id, quantity, m_id) VALUES (?, ?, ?, ?)", [generate_uuid(16), user_id, 1, menu_item_id], (err) => {
                 if (err) {
-                    // probably database data misinput e.g. unknown menu_item_id
+                    // probably database data misinput e.g. unknown menu_item_id, contraints
+                    console.log(err);
                     resolve(0);
                     return;
                 }
