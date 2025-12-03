@@ -1,0 +1,16 @@
+應該在付款後創建新對象
+window.osm = new OrderStateMachine();
+創建訂單
+osm.changeStateCreated(true);
+訂單被接受
+changeStateOrderAccept(true);
+餐廳正在準備食物
+changeStateFoodPrepare(true);
+訂單被騎手接受
+changeStateRiderAccept(true);
+騎手送餐中
+changeStateDelivery(true);
+訂單完成
+changeStateOrderFinish(true);
+訂單被取消
+changeStatecancelOrder(true);
