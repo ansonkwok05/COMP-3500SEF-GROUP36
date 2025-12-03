@@ -15,7 +15,7 @@ function validateEmail() {
         req.style.color = "#e74c3c";
         return false;
     } else {
-        req.textContent = email ? "Looks good!" : "";
+        req.textContent = email ? "Valid Email" : "";
         req.style.color = email ? "#2ecc71" : "";
         return true;
     }
@@ -29,7 +29,7 @@ function validatePassword() {
         req.style.color = "#e74c3c";
         return false;
     } else {
-        req.textContent = pass ? "Strong password!" : "";
+        req.textContent = pass ? "Valid password" : "";
         req.style.color = pass ? "#2ecc71" : "";
         return true;
     }
@@ -112,4 +112,5 @@ registerBtn.addEventListener("click", async () => {
         registerBtn.style.opacity = "1";
         registerBtn.style.pointerEvents = "auto";
     }
+
 });
