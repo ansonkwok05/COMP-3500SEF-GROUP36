@@ -73,22 +73,6 @@ APP.post("/login", async (req, res) => {
     }
 });
 
-// check authentication status, block unauthenticated users
-APP.use(async (req, res, next) => {
-    if (req.session && req.session.userID) {
-        // userID exists, but still need to validate
-        if (
-            await USER_MANAGER.validate_user_id(
-                req.session.email,
-                req.session.userID
-            )
-        )
-            return next();
-    }
-    console.log(`Redirected connection "${req.path}" -> "/login.html"`);
-    res.redirect("/login.html");
-});
-
 //Deliveryman register
 APP.post("/deli_register", async (req, res) => {
     const { email, password, name, address } = req.body;
@@ -121,18 +105,39 @@ APP.post("/deli_register", async (req, res) => {
 APP.post("/deli_login", async (req, res) => {
     const { email, password } = req.body;
 
-    if (!email.endsWith("@delivery")) {
-        return res.status(403).send("This is deliveryman login only");
+    if (!email || !email.endsWith("@delivery")) {
+        return res.status(403).send("This login is for deliverymen only");
     }
 
     if (await USER_MANAGER.login_user(email, password)) {
+        console.log(`Deliveryman Login Success: ${email}`);
+
         req.session.email = email;
         req.session.userID = await USER_MANAGER.get_user_id(email);
-        req.session.isDelivery = true;
+        req.session.isDelivery = true; 
+
         res.redirect("/protected/DeliTakeOrder/TakeOrder.html");
+		
     } else {
+        console.log(`Deliveryman Login Failed: ${email}`);
         res.status(401).send("Incorrect password");
     }
+});
+
+// check authentication status, block unauthenticated users
+APP.use(async (req, res, next) => {
+    if (req.session && req.session.userID) {
+        // userID exists, but still need to validate
+        if (
+            await USER_MANAGER.validate_user_id(
+                req.session.email,
+                req.session.userID
+            )
+        )
+            return next();
+    }
+    console.log(`Redirected connection "${req.path}" -> "/login.html"`);
+    res.redirect("/login.html");
 });
 
 // only logged in users can access under this
