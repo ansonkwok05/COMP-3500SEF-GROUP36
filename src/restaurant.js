@@ -47,9 +47,20 @@ async function get_menu(restaurant_id) {
     return r_data;
 }
 
-function update_menu_item(restaurant_id, menu_item_id, new_menu_item) {
-    // todo, will be used by admins
-    return true;
+async function update_menu_item(restaurant_id, menu_item_id, new_menu_item) {
+
+    //Find the input restaurantID is vaild or not
+    get_menu(restaurant_id);
+
+    //Update menu section
+    let update = await new Promise((resolve) => {
+        db.run("Update menu_items set new_m_item = ? where m_item_id = ? ",
+            [new_menu_item,menu_item_id],
+            (err,rows) => {resolve(rows)}
+        );
+    });
 }
 
-module.exports = { initialize_db, get_restaurant_list, get_menu };
+module.exports = { initialize_db, get_restaurant_list, get_menu, update_menu_item};
+
+
