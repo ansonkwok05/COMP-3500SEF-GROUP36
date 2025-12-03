@@ -6,10 +6,10 @@
     <title>OrderStatus</title>
     <script type="module">
         import { OrderStateMachine } from './StateMachine.js';
-        // for test
-        window.osm = new OrderStateMachine();
-        osm.changeStateCreated(true);
-        osm.changeStatecancelOrder(true);
+        // for test init
+        //window.osm = new OrderStateMachine();
+        //osm.changeStateCreated(true);
+
         var list = osm.getCurrentState()
         document.getElementById('create').textContent           = list[0];
         document.getElementById('OrderAccept').textContent      = list[1];
@@ -18,6 +18,10 @@
         document.getElementById('Delivery').textContent         = list[4];
         document.getElementById('OrderFinish').textContent      = list[5];
         document.getElementById('Cancel').textContent           = list[6];
+        if(list[0] == "Created: you dont have order"){
+             document.getElementById('orderId').textContent     = "";
+        }
+
     </script>
 </head>
 <body>

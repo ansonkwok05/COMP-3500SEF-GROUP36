@@ -4,8 +4,8 @@ export class OrderStateMachine {
     constructor() {
       // init state
       this.State = {
-        OrderID:     Math.round(Math.random()*10000),
-        Created:     'notCreated',
+        OrderID:     '',
+        Created:     'you dont have order',
         OrderAccept: 'notAccepted', 
         FoodPrepare: 'doing',
         RiderAccept: 'notAccepted',
@@ -43,6 +43,7 @@ export class OrderStateMachine {
         this.StateDates.Created = this.setTime();
         if (change){
             this.State.Created = this.stateRules.Created[0];
+            this.State.OrderID = Math.round(Math.random()*10000);
         }
         else{
             this.State.Created = this.stateRules.Created[1];
