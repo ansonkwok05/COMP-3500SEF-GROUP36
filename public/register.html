@@ -2,41 +2,40 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="css/register.css">
 	<title>Register</title>
 </head>
 <body>
-	<h1>Register</h1>
-	<form id="register_form" method="POST" action="/register">
-		<label>
-		Email:
-		<input type="email" name="email" required/>
-		</label>
-
-		<br>
-
-		<label>
-		Password:
-		<input type="password" name="password" required/>
-		</label>
-
-		<br>
-
-		<label>
-		Name:
-		<input type="text" name="name" required/>
-		</label>
-
-		<br>
-
-		<label>
-		Address:
-		<input type="text" name="address" required/>
-		</label>
-
-		<button type="submit">Send</button>
-	</form>
-
-	<div id="response"></div>
+	<div id="page_container" class="centered_container">
+		<div id="register_container" class="centered_container">
+			<div id="main_container">
+				<div id="register_label">
+					<div>Register new account</div>
+					<div id="login_hint_label">...or login <a id="login_portal" href="login.html">here</a></div>
+				</div>
+				<div class="input_container">
+					<input id="email_input" class="input_box" type="email" placeholder="Email">
+					<div id="email_input_requirement"></div>
+				</div>
+				<div class="input_container">
+					<input id="password_input" class="input_box" type="password" placeholder="Password">
+					<div id="password_input_requirement"></div>
+				</div>
+				<div class="input_container">
+					<input id="name_input" class="input_box" type="name" placeholder="Name">
+					<div id="name_input_requirement"></div>
+				</div>
+				<div class="input_container">
+					<input id="address_input" class="input_box" type="name" placeholder="Address">
+					<div id="address_input_requirement"></div>
+				</div>
+				<div id="register_button_container">
+					<div id="register_button">Register</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<script src="js/register.js"></script>
 </body>

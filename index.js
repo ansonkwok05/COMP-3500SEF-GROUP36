@@ -41,7 +41,11 @@ APP.post("/register", async (req, res) => {
         console.log(
             `Register Success: ${email}, ${password}, ${name}, ${address}`
         );
-        res.status(200).send("Registered");
+
+        // login automatically after register success
+        req.session.email = email;
+        req.session.userID = await USER_MANAGER.get_user_id(email);
+        res.redirect("/restaurantList/restaurantList.html");
     } else {
         console.log(
             `Register Fail: ${email}, ${password}, ${name}, ${address}`
