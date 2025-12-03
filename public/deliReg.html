@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/register.css">
+    <title>Deliveryman Register</title>
+</head>
+<body>
+    <div id="page_container" class="centered_container">
+        <div id="login_container" class="centered_container">
+            <div id="main_container">
+                <div id="login_label">
+                    <div>Deliveryman Register</div>
+                    <div id="register_hint_label">
+                        Already have an account? <a href="deli_login.html">Login here</a>
+                    </div>
+                </div>
+
+                <div class="input_container">
+                    <input id="email_input" class="input_box" type="email" placeholder="Email (must end with @delivery)" required>
+                    <div id="email_requirement" class="requirement-text"></div>
+                </div>
+
+                <div class="input_container">
+                    <input id="password_input" class="input_box" type="password" placeholder="Password (8+ characters)" required>
+                    <div id="password_requirement" class="requirement-text"></div>
+                </div>
+
+                <div class="input_container">
+                    <input id="name_input" class="input_box" type="text" placeholder="Full Name" required>
+                    <div id="name_requirement" class="requirement-text"></div>
+                </div>
+
+                <div id="login_button_container">
+                    <div id="register_button" class="clickable">Register as Deliveryman</div>
+                </div>
+
+                <!-- 成功/失敗訊息區 -->
+                <div id="response"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/deliReg.js"></script>
+</body>
+</html>
