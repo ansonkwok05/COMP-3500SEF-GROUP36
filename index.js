@@ -257,7 +257,7 @@ async function getOrdersForUser(userID) {
     const db = new sqlite3.Database('./db/data.db');
 
     return new Promise((resolve, reject) => {
-        db.all('SELECT id, status FROM orders WHERE userid = ?', [userID], (err, rows) => {
+        db.all('SELECT id, status FROM orders WHERE userid = ? OR deliverymanID = ?', [userID, userID], (err, rows) => {
             if (err) {
                 reject(err);
             }
