@@ -288,7 +288,7 @@ APP.get("/api/all_orders", async (req, res) => {
     const db = new sqlite3.Database('./db/data.db');
 
     return new Promise((resolve, reject) => {
-        db.all('SELECT * FROM orders', [], (err, rows) => {
+        db.all('SELECT * FROM orders WHERE deliverymanID IS NULL', [], (err, rows) => {
             if (err) {
                 reject(err);
             }
