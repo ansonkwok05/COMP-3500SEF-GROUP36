@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     checkoutBtn.addEventListener('click', () => {
         if (!checkoutBtn.disabled) {
-            window.location.href = '/checkout';
+            window.location.href = '/payment/payment.html';
         }
     });
 });
