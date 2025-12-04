@@ -1,82 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-    <title>Order Status</title>
-    <script src="StateMachine.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking</title>
+    <link rel="stylesheet" href="./status.css">
+
 </head>
 <body>
-    <div id="app">
-        <h1 id="orderId"></h1>
-        <h1>-----------------------------------</h1>
-        <h2 id="create"></h2>
-        <h2 id="OrderAccept"></h2>
-        <h2 id="FoodPrepare"></h2>
-        <h2 id="RiderAccept"></h2>
-        <h2 id="Delivery"></h2>
-        <h2 id="OrderFinish"></h2>
-        <h2 id="Cancel"></h2>
+    <div class="container">
+        <h1>My orders</h1>
+        <div id="orders"></div>
+        <div id="error-message" class="error"></div>
     </div>
 
     <script>
-        const elements = {
-            orderId: document.getElementById('orderId'),
-            create: document.getElementById('create'),
-            OrderAccept: document.getElementById('OrderAccept'),
-            FoodPrepare: document.getElementById('FoodPrepare'),
-            RiderAccept: document.getElementById('RiderAccept'),
-            Delivery: document.getElementById('Delivery'),
-            OrderFinish: document.getElementById('OrderFinish'),
-            Cancel: document.getElementById('Cancel')
-        };
-
-        function updateDisplay() {
-            const state = window.osm.State;
-            const dates = window.osm.StateDates;
-
-            // update order ID
-            elements.orderId.textContent = "OrderID: " + state.OrderID;
-
-            // update all states
-            updateStateElement('create', 'Created', state, dates);
-            updateStateElement('OrderAccept', 'OrderAccept', state, dates);
-            updateStateElement('FoodPrepare', 'FoodPrepare', state, dates);
-            updateStateElement('RiderAccept', 'RiderAccept', state, dates);
-            updateStateElement('Delivery', 'Delivery', state, dates);
-            updateStateElement('OrderFinish', 'OrderFinish', state, dates);
-
-            // update cancel status
-            if (state.Cancel === 'cancelled') {
-                elements.Cancel.textContent = "Cancel: cancelled";
-            } else {
-                elements.Cancel.textContent = "Cancel: ";
+        async function fetchOrders() {
+            try {
+                const userResponse = await fetch('/api/get_user_id');
+                if (userResponse.ok) {
+                    const userData = await userResponse.json();
+                    userID = userData.userID;
+                }
+                const response = await fetch('/api/orders?user_id=' + userID);
+                if (!response.ok) {
+                    throw new Error('Unable to obtain order information');
+                }
+                const data = await response.json();
+                displayOrders(data.orders);
+            } catch (error) {
+                document.getElementById('error-message').textContent = error.message;
             }
         }
 
-        function updateStateElement(elementId, stateKey, state, dates) {
-            const element = elements[elementId];
-
-            if (state[stateKey] === 'finish') {
-                element.textContent = stateKey + ": finish (" + dates[stateKey] + ")";
-            } else if (state[stateKey] === 'cancelled') {
-                element.textContent = stateKey + ": cancelled";
-            } else if (state[stateKey] === '') {
-                element.textContent = stateKey + ": ";
-            } else if (state[stateKey] === 'you dont have order') {
-                element.textContent = stateKey + ": you dont have order";
-            } else {
-                element.textContent = stateKey + ": " + state[stateKey];
+        function displayOrders(orders) {
+            const ordersDiv = document.getElementById('orders');
+            ordersDiv.innerHTML = '';
+            if (orders.length === 0) {
+                ordersDiv.innerHTML = '<p>No orders available。</p>';
+                return;
             }
+
+            orders.forEach(order => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order';
+                orderDiv.innerHTML = `<strong>order ID:</strong> ${order.id} <br> <strong>status:</strong> ${order.status}`;
+                ordersDiv.appendChild(orderDiv);
+            });
         }
 
-        // show status when page loads
-        window.onload = function() {
-            updateDisplay();
-        };
-
-        // listen for status changes
-        window.osm.onStateUpdate(function(state, dates) {
-            updateDisplay();
-        });
+        window.onload = fetchOrders;
     </script>
+
+    <nav class="bottom-navi-bar">
+        <a href="/restaurantList/restaurantList.html" class="nav-item active">
+            <span class="icon">🏠</span>
+            <span class="label">Home</span>
+        </a>
+        <a href="/order_tracking/OrderStatus.html" class="nav-item">
+            <span class="icon">📜</span>
+            <span class="label">Orders</span>
+        </a>
+        <a href="/" class="nav-item" id="logout">
+            <span class="icon">👤</span>
+            <span class="label">Logout</span>
+        </a>
+    </nav>
 </body>
 </html>
