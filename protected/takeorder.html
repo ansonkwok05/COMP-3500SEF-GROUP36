@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery - Take Order</title>
+    <link rel="stylesheet" href="./TakeOrder.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Available Orders</h1>
+        <div id="orders"></div>
+        <div id="error-message" class="error"></div>
+    </div>
+
+    <script>
+        async function fetchOrders() {
+            try {
+                const response = await fetch('/api/all_orders');
+                if (!response.ok) {
+                    throw new Error('Unable to obtain order information');
+                }
+                const data = await response.json();
+                displayOrders(data.orders);
+            } catch (error) {
+                document.getElementById('error-message').textContent = error.message;
+            }
+        }
+
+        async function assignOrder(orderId) {
+            try {
+                const response = await fetch(`/api/order/${orderId}/assign`, {
+                    method: 'PUT'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to assign order');
+                }
+
+                fetchOrders();
+
+            } catch (error) {
+                document.getElementById('error-message').textContent = error.message;
+            }
+        }
+
+        function displayOrders(orders) {
+            const ordersDiv = document.getElementById('orders');
+            ordersDiv.innerHTML = '';
+            if (orders.length === 0) {
+                ordersDiv.innerHTML = '<p>No orders available.</p>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order';
+
+                let buttonHTML = '';
+                if (!order.deliverymanID) {
+                    buttonHTML = `<button onclick="assignOrder('${order.id}')">Take Order</button>`;
+                }
+
+                orderDiv.innerHTML = `
+                    <strong>Order ID:</strong> ${order.id} <br>
+                    <strong>Status:</strong> ${order.status} <br>
+                    ${buttonHTML}
+                `;
+
+                ordersDiv.appendChild(orderDiv);
+            });
+        }
+
+        window.onload = fetchOrders;
+    </script>
+
+    <nav class="bottom-navi-bar">
+        <a href="/protected/DeliTakeOrder/takeorder.html" class="nav-item active">
+            <span class="icon">📋</span>
+            <span class="label">Orders</span>
+        </a>
+        <a href="/order_tracking/OrderStatus.html" class="nav-item">
+            <span class="icon">📜</span>
+            <span class="label">Orders</span>
+        </a>
+        <a href="/logout" class="nav-item" id="logout">
+            <span class="icon">👤</span>
+            <span class="label">Logout</span>
+        </a>
+    </nav>
+</body>
+</html>
