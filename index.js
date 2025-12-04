@@ -20,6 +20,11 @@ APP.use(EXPRESS.static("./public"));
 
 APP.use(BODYPARSER.urlencoded({ extended: true }));
 
+APP.use(
+    "/success/",
+    EXPRESS.static(path.join(__dirname, "/protected/success"))
+);
+
 // session for authentication after user log in
 APP.use(
     SESSION({
@@ -215,6 +220,69 @@ APP.delete("/api/cart/clear", async (req, res) => {
     });
 })
 
+//newn -----------------------------------------------------------------------------
+APP.use(BODYPARSER.json()); // 添加这一行
+APP.use(BODYPARSER.urlencoded({ extended: true }));
+
+
+APP.get("/api/get_user_id", (req, res) => {
+    if (req.session && req.session.userID) {
+        res.status(200).json({ userID: req.session.userID });
+    } else {
+        res.status(404).json({ error: "User not logged in" });
+    }
+});
+
+APP.get("/api/orders", async (req, res) => {
+    const userID = req.query.user_id;
+
+    if (!userID) {
+        return res.status(400).json({ error: "缺少用户 ID" });
+    }
+
+    // 假设你有一个方法可以根据用户 ID 获取订单
+    const orders = await getOrdersForUser(userID); // 实现这个方法
+
+    if (!orders) {
+        return res.status(404).json({ orders: [] });
+    }
+
+    res.status(200).json({ orders });
+});
+
+// 获取用户订单的示例函数
+async function getOrdersForUser(userID) {
+    const db = new sqlite3.Database('./db/data.db');
+
+    return new Promise((resolve, reject) => {
+        db.all('SELECT id, status FROM orders WHERE userid = ?', [userID], (err, rows) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(rows);
+        });
+    });
+}
+
+APP.post("/api/create_order", async (req, res) => {
+    const { orderID, userID, status } = req.body;
+
+    if (!orderID || !userID || !status)  {
+        return res.status(400).json({ error: "缺少必要的订单信息" });
+    }
+
+    const db = new sqlite3.Database('./db/data.db');
+
+    db.run('INSERT INTO orders (id, userID, status) VALUES (?, ?, ?)', [orderID, userID, status], function(err) {
+        if (err) {
+            console.error("Error inserting order:", err);
+            return res.status(500).json({ error: "无法创建订单" });
+        }
+        res.status(201).json({ message: "订单创建成功" });
+    });
+});
+//new---------------------------------------------------------------------------
+
 APP.use(
     "/order_tracking/",
     EXPRESS.static(path.join(__dirname, "/protected/order_tracking"))
@@ -264,6 +332,9 @@ async function start_app() {
             );
             db.run(
                 "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
+            );
+            db.run(
+                "CREATE TABLE IF NOT EXISTS orders (id VARCHAR(50) PRIMARY KEY NOT NULL, userID CHAR(16) NOT NULL, status VARCHAR(50) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (userID) REFERENCES users (id))"
             );
         });
 
