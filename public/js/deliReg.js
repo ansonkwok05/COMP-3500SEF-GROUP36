@@ -1,4 +1,3 @@
-// js/deliReg.js - 專業外送員註冊（最終版）
 const emailInput = document.getElementById("email_input");
 const passwordInput = document.getElementById("password_input");
 const nameInput = document.getElementById("name_input");
@@ -6,7 +5,6 @@ const addressInput = document.getElementById("address_input");
 const registerBtn = document.getElementById("register_button");
 const responseDiv = document.getElementById("response");
 
-// 即時驗證函數
 function validateEmail() {
     const email = emailInput.value.trim();
     const req = document.getElementById("email_requirement");
@@ -44,14 +42,11 @@ function validateName() {
 }
 
 
-// 綁定即時驗證
 emailInput.addEventListener("input", validateEmail);
 passwordInput.addEventListener("input", validatePassword);
 nameInput.addEventListener("input", validateName);
 
-// 註冊按鈕點擊
 registerBtn.addEventListener("click", async () => {
-    // 先檢查所有欄位
     const isEmailOk = validateEmail();
     const isPassOk = validatePassword();
     const isNameOk = validateName();
@@ -62,7 +57,6 @@ registerBtn.addEventListener("click", async () => {
         return;
     }
 
-    // 按鈕變成載入中
     registerBtn.textContent = "Registering...";
     registerBtn.style.opacity = "0.7";
     registerBtn.style.pointerEvents = "none";
@@ -107,10 +101,10 @@ registerBtn.addEventListener("click", async () => {
         responseDiv.style.color = "#e74c3c";
         responseDiv.textContent = "Network error. Please check your connection.";
     } finally {
-        // 恢復按鈕
         registerBtn.textContent = "Register as Deliveryman";
         registerBtn.style.opacity = "1";
         registerBtn.style.pointerEvents = "auto";
     }
 
 });
+
