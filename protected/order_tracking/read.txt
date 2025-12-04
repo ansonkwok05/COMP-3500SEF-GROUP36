@@ -1,9 +1,0 @@
-<script src="../order_tracking/StateMachine.js"></script>
-
-window.osm.changeStateCreated();
-window.osm.changeStateOrderAccept();
-window.osm.changeStateFoodPrepare();
-window.osm.changeStateRiderAccept();
-window.osm.changeStateDelivery();
-window.osm.changeStateOrderFinish();
-window.osm.changeStateCancel();
