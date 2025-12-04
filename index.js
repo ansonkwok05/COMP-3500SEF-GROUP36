@@ -78,7 +78,7 @@ APP.post("/login", async (req, res) => {
     }
 });
 
-//Deliveryman register
+// Deliveryman register
 APP.post("/deli_register", async (req, res) => {
     const { email, password, name, address } = req.body;
 
@@ -106,7 +106,7 @@ APP.post("/deli_register", async (req, res) => {
     }
 });
 
-//Deliveryman Login
+// Deliveryman Login
 APP.post("/deli_login", async (req, res) => {
     const { email, password } = req.body;
 
@@ -121,7 +121,7 @@ APP.post("/deli_login", async (req, res) => {
         req.session.userID = await USER_MANAGER.get_user_id(email);
         req.session.isDelivery = true;
 
-        res.redirect("/protected/DeliTakeOrder/TakeOrder.html");
+        res.redirect("/DeliTakeOrder/TakeOrder.html");
 
     } else {
         console.log(`Deliveryman Login Failed: ${email}`);
@@ -150,6 +150,11 @@ APP.use(async (req, res, next) => {
 APP.use(
     "/restaurantList/",
     EXPRESS.static(path.join(__dirname, "/protected/restaurantList"))
+);
+
+APP.use(
+    "/DeliTakeOrder",
+    EXPRESS.static(path.join(__dirname, "/protected/DeliTakeOrder"))
 );
 
 APP.use(
@@ -213,8 +218,8 @@ APP.delete("/api/cart/remove/:id", async (req, res) => {
 })
 
 APP.delete("/api/cart/clear", async (req, res) => {
-    // remove a specific menu item from cart
-    // takes menu item id as argument, return true
+    // remove all items from cart
+    // return true
     res.status(200).json({
         cleared: await CART_MANAGER.clear_cart(await USER_MANAGER.get_user_id(req.session.email))
     });
@@ -279,6 +284,71 @@ APP.post("/api/create_order", async (req, res) => {
     });
 });
 
+APP.get("/api/all_orders", async (req, res) => {
+    const db = new sqlite3.Database('./db/data.db');
+
+    return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM orders', [], (err, rows) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(rows);
+        });
+    }).then(orders => {
+        res.status(200).json({ orders });
+    }).catch(err => {
+        console.error("Error fetching all orders:", err);
+        res.status(500).json({ error: "Unable to fetch orders" });
+    });
+});
+
+// Assign order to deliveryman
+APP.put("/api/order/:orderId/assign", async (req, res) => {
+    const orderId = req.params.orderId;
+    const deliverymanId = req.session.userID;
+    const db = new sqlite3.Database('./db/data.db');
+
+    return new Promise((resolve, reject) => {
+        db.run(
+            'UPDATE orders SET deliverymanID = ? WHERE id = ?',
+            [deliverymanId, orderId],
+            function(err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({ success: true });
+                }
+            }
+        );
+    }).then(result => {
+        res.status(200).json(result);
+    }).catch(err => {
+        console.error("Error assigning order:", err);
+        res.status(500).json({ error: "Unable to assign order" });
+    }).finally(() => {
+        db.close();
+    });
+});
+
+// Display all columns of the orders table
+APP.get("/api/debug/orders/columns", (req, res) => {
+    const db = new sqlite3.Database('./db/data.db');
+
+    db.all("PRAGMA table_info(orders)", (err, rows) => {
+        if (err) {
+            console.error("Error getting table info:", err);
+            res.status(500).json({ error: "Unable to get table info" });
+        } else {
+            console.log("Orders table columns:");
+            rows.forEach(row => {
+                console.log(`  ${row.name} (${row.type})`);
+            });
+            res.status(200).json({ columns: rows });
+        }
+        db.close();
+    });
+});
+
 APP.use(
     "/order_tracking/",
     EXPRESS.static(path.join(__dirname, "/protected/order_tracking"))
@@ -330,7 +400,7 @@ async function start_app() {
                 "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
             );
             db.run(
-                "CREATE TABLE IF NOT EXISTS orders (id VARCHAR(50) PRIMARY KEY NOT NULL, userID CHAR(16) NOT NULL, status VARCHAR(50) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (userID) REFERENCES users (id))"
+                "CREATE TABLE IF NOT EXISTS orders (id VARCHAR(50) PRIMARY KEY NOT NULL, userID CHAR(16) NOT NULL, deliverymanID CHAR(16), status VARCHAR(50) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (userID) REFERENCES users (id), FOREIGN KEY (deliverymanID) REFERENCES users (id))"
             );
         });
 
