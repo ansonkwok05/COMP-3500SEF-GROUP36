@@ -220,8 +220,7 @@ APP.delete("/api/cart/clear", async (req, res) => {
     });
 })
 
-//newn -----------------------------------------------------------------------------
-APP.use(BODYPARSER.json()); // 添加这一行
+APP.use(BODYPARSER.json());
 APP.use(BODYPARSER.urlencoded({ extended: true }));
 
 
@@ -237,11 +236,10 @@ APP.get("/api/orders", async (req, res) => {
     const userID = req.query.user_id;
 
     if (!userID) {
-        return res.status(400).json({ error: "缺少用户 ID" });
+        return res.status(400).json({ error: "Missing user ID" });
     }
 
-    // 假设你有一个方法可以根据用户 ID 获取订单
-    const orders = await getOrdersForUser(userID); // 实现这个方法
+    const orders = await getOrdersForUser(userID);
 
     if (!orders) {
         return res.status(404).json({ orders: [] });
@@ -250,7 +248,6 @@ APP.get("/api/orders", async (req, res) => {
     res.status(200).json({ orders });
 });
 
-// 获取用户订单的示例函数
 async function getOrdersForUser(userID) {
     const db = new sqlite3.Database('./db/data.db');
 
@@ -268,7 +265,7 @@ APP.post("/api/create_order", async (req, res) => {
     const { orderID, userID, status } = req.body;
 
     if (!orderID || !userID || !status)  {
-        return res.status(400).json({ error: "缺少必要的订单信息" });
+        return res.status(400).json({ error: "Missing necessary order information" });
     }
 
     const db = new sqlite3.Database('./db/data.db');
@@ -276,12 +273,11 @@ APP.post("/api/create_order", async (req, res) => {
     db.run('INSERT INTO orders (id, userID, status) VALUES (?, ?, ?)', [orderID, userID, status], function(err) {
         if (err) {
             console.error("Error inserting order:", err);
-            return res.status(500).json({ error: "无法创建订单" });
+            return res.status(500).json({ error: "Unable to create an order" });
         }
-        res.status(201).json({ message: "订单创建成功" });
+        res.status(201).json({ message: "Order created successfully" });
     });
 });
-//new---------------------------------------------------------------------------
 
 APP.use(
     "/order_tracking/",
