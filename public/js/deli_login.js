@@ -93,7 +93,8 @@ loginBtn.addEventListener("click", async () => {
     try {
         const res = await fetch("/deli_login", {
             method: "POST",
-            body: data
+            body: data,
+            redirect: "follow"
         });
 
         if (res.redirected) {
