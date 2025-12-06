@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="681747be-8677-449d-83f3-3635ec88f3b0" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/protected/MenuModify/Dashboard.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/protected/MenuModify/Setting.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/protected/MenuModify/css/dashboard.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/protected/MenuModify/css/setting.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/protected/MenuModify/js/Setting.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/ShopOwnerLogin.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/ShopOwnerReg.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/js/ShopOwnerLogin.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/js/ShopOwnerReg.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Shop_owner_infos.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/restaurant_M.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/protected/menu/menu.html" beforeDir="false" afterPath="$PROJECT_DIR$/protected/menu/menu.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/css/register.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/register.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/restaurant.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/restaurant.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Hnz609&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ansonkwok05/COMP-3500SEF-GROUP36.git&quot;,
+    &quot;accountId&quot;: &quot;07bfc3a4-ca2d-46f6-8af8-d58bd9489da0&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="36KUmLl3tempj1NMKGDYqq72jFy" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.OrderStatus.html.executor": "Run",
+    "JavaScript Debug.deliReg.html.executor": "Run",
+    "JavaScript Debug.deli_login.html.executor": "Run",
+    "JavaScript Debug.menu.html.executor": "Run",
+    "JavaScript Debug.register.html.executor": "Run",
+    "JavaScript Debug.restaurantList.html.executor": "Run",
+    "Node.js.index.js.executor": "Run",
+    "Node.js.restaurant.js.executor": "Run",
+    "Notification.DisplayName-DoNotAsk-Vcs Important Messages": "VCS important messages",
+    "Notification.DoNotAsk-Vcs Important Messages": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "disable.download.node.interpreter.editor.notification": "true",
+    "git-widget-placeholder": "Hin__testing",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/hinze/OneDrive/文件/GitHub",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "C:/Users/hinze/AppData/Roaming/JetBrains/IntelliJIdea2024.2/node/versions/24.11.1/node",
+    "nodejs_package_manager_path": "npm",
+    "npm.install.executor": "Run",
+    "npm.start.executor": "Run",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="COMP-3500SEF-GROUP36" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="COMP-3500SEF-GROUP36" />
+      <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.28238.7" />
+        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-IU-252.28238.7" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="681747be-8677-449d-83f3-3635ec88f3b0" name="Changes" comment="" />
+      <created>1764754917194</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1764754917194</updated>
+      <workItem from="1764754918713" duration="642000" />
+      <workItem from="1764758616033" duration="302000" />
+      <workItem from="1764770469289" duration="70000" />
+      <workItem from="1764770865553" duration="5766000" />
+      <workItem from="1764776732510" duration="415000" />
+      <workItem from="1764777282252" duration="180000" />
+      <workItem from="1764777556363" duration="85000" />
+      <workItem from="1764777652999" duration="27000" />
+      <workItem from="1764777687766" duration="158000" />
+      <workItem from="1764777856977" duration="352000" />
+      <workItem from="1764778225674" duration="15000" />
+      <workItem from="1764778278478" duration="11000" />
+      <workItem from="1764778415762" duration="1115000" />
+      <workItem from="1764824810521" duration="18000" />
+      <workItem from="1764825049897" duration="1879000" />
+      <workItem from="1764842283040" duration="401000" />
+      <workItem from="1764873778874" duration="2333000" />
+      <workItem from="1765035095146" duration="1385000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

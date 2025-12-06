@@ -71,7 +71,7 @@ body {
     font-size: 16px;
 }
 
-#main_container #email_input_requirement, #password_input_requirement, #name_input_requirement, #address_input_requirement {
+#main_container #email_input_requirement, #password_input_requirement, #name_input_requirement, #address_input_requirement, #password_Confirm_requirement{
     position: absolute;
     color: red;
 }
