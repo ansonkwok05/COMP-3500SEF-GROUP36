@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(json => {
             if (!json?.menu_items || Object.keys(json.menu_items).length === 0) {
-                menuContainer.innerHTML = '<p class="text-center text-gray-600 py-10">This restaurant has no menu items yet.</p>';
+                menuContainer.innerHTML = 'This restaurant has no menu items yet.';
                 return;
             }
 
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         })
         .catch(() => {
-            menuContainer.innerHTML = '<p class="text-center text-red-600 py-10">Failed to load menu.</p>';
+            menuContainer.innerHTML = 'Failed to load menu.';
         });
 
     async function addToCart(itemId, button) {
