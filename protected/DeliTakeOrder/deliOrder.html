@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery - My Orders</title>
+    <link rel="stylesheet" href="/DeliTakeOrder/TakeOrder.css"> 
+    <style>
+        .order {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 12px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .status-pending { color: #e67e22; font-weight: bold; }
+        .status-delivering { color: #3498db; font-weight: bold; }
+        .status-completed { color: #27ae60; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Orders</h1>
+        <div id="orders"></div>
+        <div id="error-message" class="error"></div>
+    </div>
+
+    <script>
+        let currentDeliverymanID = null;
+
+        //get current deliveryman ID
+        async function getCurrentUserID() {
+            try {
+                const res = await fetch('/api/get_user_id');
+                if (!res.ok) throw new Error('Unable to get user info');
+                const data = await res.json();
+                return data.userID;
+            } catch (err) {
+                document.getElementById('error-message').textContent = 'Login expired, please login again';
+                setTimeout(() => location.href = '/deli_login.html', 2000);
+                return null;
+            }
+        }
+
+        async function fetchMyOrders() {
+            try {
+                if (!currentDeliverymanID) {
+                    currentDeliverymanID = await getCurrentUserID();
+                    if (!currentDeliverymanID) return;
+                }
+
+                const response = await fetch(`/api/my_delivery_orders?deliverymanID=${currentDeliverymanID}`);
+                if (!response.ok) {
+                    throw new Error('Unable to get my orders');
+                }
+                const data = await response.json();
+                displayOrders(data.orders || []);
+            } catch (error) {
+                document.getElementById('error-message').textContent = error.message;
+            }
+        }
+
+        function displayOrders(orders) {
+            const ordersDiv = document.getElementById('orders');
+            ordersDiv.innerHTML = '';
+
+            if (orders.length === 0) {
+                ordersDiv.innerHTML = '<p style="text-align:center;color:#888">You have not received any orders yet~</p>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = 'order';
+
+                const statusClass = 
+                    order.status === 'pending' ? 'status-pending' :
+                    order.status === 'delivering' ? 'status-delivering' :
+                    'status-completed';
+
+                const statusText = 
+                    order.status === 'pending' ? 'Waiting for pickup' :
+                    order.status === 'delivering' ? 'Delivering' : 'Completed';
+
+                orderDiv.innerHTML = `
+                    <strong>Order ID:</strong> ${order.id} <br>
+                    <strong>Customer ID:</strong> ${order.userID} <br>
+                    <strong>Status:</strong> <span class="${statusClass}">${statusText}</span> <br>
+                    <strong>Created:</strong> ${new Date(order.created_at).toLocaleString()} <br><br>
+
+                    ${order.status === 'pending' ? `
+                    <button onclick="updateOrderStatus('${order.id}', 'delivering')" style="background:#3498db;">
+                        Start Delivery
+                    </button>` : ''}
+
+                    ${order.status === 'delivering' ? `
+                    <button onclick="updateOrderStatus('${order.id}', 'completed')" style="background:#27ae60;">
+                        Complete Delivery
+                    </button>` : ''}
+                `;
+
+                ordersDiv.appendChild(orderDiv);
+            });
+        }
+
+        window.onload = fetchMyOrders;
+    </script>
+
+    <nav class="bottom-navi-bar">
+        <a href="/DeliTakeOrder/TakeOrder.html" class="nav-item active">
+            <span class="icon">📋</span>
+            <span class="label">Take Orders</span>
+        </a>
+        
+        <a href="/DeliTakeOrder/deliOrder.html" class="nav-item">
+            <span class="icon">🛵</span>
+            <span class="label">My Orders</span>
+        
+        <a href="/logout" class="nav-item" id="logout">
+            <span class="icon">👤</span>
+            <span class="label">Logout</span>
+        </a>
+    </nav>
+</body>
+</html>
