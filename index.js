@@ -11,6 +11,7 @@ const UTILS = require("./src/utils.js");
 const USER_MANAGER = require("./src/user_manager.js");
 const RESTAURANT = require("./src/restaurant.js");
 const CART_MANAGER = require("./src/cart_manager.js");
+const SHOP_OWNER_INFO = require("./src/Shop_owner_infos.js");
 
 const PORT = process.env.PORT || 8080;
 const ERR_MESSAGE = "404 Page not found";
@@ -124,10 +125,62 @@ APP.post("/deli_login", async (req, res) => {
     }
 });
 
+//Shop Owner Login
+
+APP.post("/ShopOwnerReg", async (req, res) => {
+    const {name, email, password, r_name, r_address} = req.body;
+
+    if (await SHOP_OWNER_INFO.register_owner(email, password, name, r_name, r_address)) {
+        console.log(
+            `Register Success: ${name},${email} ,${password}, ${r_name}, ${r_address}`
+        );
+
+        // login automatically after register success
+        req.session.email = email;
+        req.session.userID = await SHOP_OWNER_INFO.get_R_users_id(email);
+        req.session.isShopOwner = true;
+
+        res.redirect("/protected/MenuModify/Dashboard.html");
+    } else {
+        console.log(
+            `Register Fail: ${name},${email} ,${password}, ${r_name}, ${r_address}`
+        );
+        res.status(401).send("Register failed");
+    }
+});
+
+APP.post("/ShopOwnerLogin", async (req, res) => {
+    const {email, password } = req.body;
+
+    if (await SHOP_OWNER_INFO.login_R_user(email, password)) {
+        console.log(`Login Success: ${email}, ${password}`);
+
+        // set session email and userID so user only need to sign in once per session
+        req.session.email = email;
+        req.session.userID = await SHOP_OWNER_INFO.get_R_users_id(email);
+        req.session.isShopOwner = true;
+
+        res.redirect("/protected/MenuModify/Dashboard.html");
+    } else {
+        console.log(`Login Fail: ${email}, ${password}`);
+        res.status(401).json({
+            success: false,
+            reason: "incorrect email or password",
+        });
+    }
+});
+
 // check authentication status, block unauthenticated users
 APP.use(async (req, res, next) => {
-    if (req.session && req.session.userID) {
+    if (req.session && req.session.userID && req.session.email) {
         // userID exists, but still need to validate
+        if (await SHOP_OWNER_INFO.validate_r_user_id(
+                req.session.email,
+                req.session.userID
+            )){
+            return next();
+        }
+
         if (
             await USER_MANAGER.validate_user_id(
                 req.session.email,
@@ -139,7 +192,11 @@ APP.use(async (req, res, next) => {
     console.log(`Redirected connection "${req.path}" -> "/login.html"`);
     res.redirect("/login.html");
 });
-
+// Shop Owner section//
+APP.use(
+    "/protected/MenuModify/",
+    EXPRESS.static(path.join(__dirname, "/protected/MenuModify"))
+);
 // only logged in users can access under this
 
 APP.use(
@@ -257,14 +314,18 @@ async function start_app() {
                 "CREATE TABLE IF NOT EXISTS users (id CHAR(16) PRIMARY KEY NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL, name VARCHAR(255), address VARCHAR(255))"
             );
             db.run(
-                "CREATE TABLE IF NOT EXISTS restaurants (r_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255) NOT NULL, address VARCHAR(255), cuisine VARCHAR(30), rating REAL)"
+                "CREATE TABLE IF NOT EXISTS R_users (id CHAR(16) PRIMARY KEY NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL, name VARCHAR(255))"
             );
             db.run(
-                "CREATE TABLE IF NOT EXISTS menu_items (m_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255), price REAL, description VARCHAR(255), r_id CHAR(16) NOT NULL, FOREIGN KEY (r_id) REFERENCES restaurants (r_id))"
+                "CREATE TABLE IF NOT EXISTS restaurants (r_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255) NOT NULL, address VARCHAR(255), cuisine VARCHAR(30), rating REAL, FOREIGN KEY (r_id) REFERENCES R_users (id))"
+            );
+            db.run(
+                "CREATE TABLE IF NOT EXISTS menu_items (m_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255), price REAL, description VARCHAR(255), r_id CHAR(16) NOT NULL, FOREIGN KEY (r_id) REFERENCES R_users (id))"
             );
             db.run(
                 "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
             );
+
         });
 
         // initialize example data
@@ -318,6 +379,7 @@ async function start_app() {
                 USER_MANAGER.initialize_db(db_path);
                 RESTAURANT.initialize_db(db_path);
                 CART_MANAGER.initialize_db(db_path);
+                SHOP_OWNER_INFO.initialize_db(db_path);
 
                 resolve();
             });

@@ -49,7 +49,7 @@ async function get_menu(restaurant_id) {
 
 async function update_menu_item(restaurant_id, menu_item_id, new_menu_item) {
 
-    //Find the input restaurantID is vaild or not
+    //Find the input restaurantID is valid or not
     get_menu(restaurant_id);
 
     //Update menu section
