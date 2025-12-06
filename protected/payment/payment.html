@@ -12,34 +12,34 @@
   </div>
   
 <div class="payment-form">
-    <label>Payment Method</label>
+    <label style="text-align:center;">Payment Method</label>
     <select id="paymentMethod">
       <option value="card">Credit/Debit Card</option>
       <option value="upi">UPI</option>
     </select>
 
     <div id="cardSection">
-      <label>Card Number</label>
+      <label style="text-align:center;">Card Number</label>
       <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19"/>
 
       <div class="card-inputs">
         <div>
-          <label>Expiry (MM/YY)</label>
+          <label style="text-align:center;">Expiry (MM/YY)</label>
           <input type="text" id="expiry" placeholder="12/25" maxlength="5"/>
         </div>
         <div>
-          <label>CVV</label>
+          <label style="text-align:center;">CVV</label>
           <input type="text" id="cvv" placeholder="123" maxlength="4"/>
         </div>
       </div>
     </div>
   
     <div id="upiSection" style="display:none;">
-      <label>UPI ID</label>
+      <label style="text-align:center;">UPI ID</label>
       <input type="text" id="upiId" placeholder="yourname@upi"/>
     </div>
 
-    <button class="pay-btn" id="payButton">Pay</button>
+    <button class="pay-btn" id="payButton" style="text-align:center;">Pay</button>
     <div id="result"></div>
   </div>
 </div>
