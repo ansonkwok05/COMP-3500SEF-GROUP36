@@ -330,6 +330,29 @@ APP.put("/api/order/:orderId/assign", async (req, res) => {
     });
 });
 
+// Get deliveryman's orders
+APP.get("/api/my_delivery_orders", async (req, res) => {
+    if (!req.session?.userID || !req.session?.isDelivery) {
+        return res.status(403).json({ error: "Permission denied" });
+    }
+
+    const deliverymanID = req.query.deliverymanID || req.session.userID;
+
+    const db = new sqlite3.Database('./db/data.db');
+    
+    db.all(
+        `SELECT * FROM orders WHERE deliverymanID = ? ORDER BY created_at DESC`,
+        [deliverymanID],
+        (err, rows) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Database error" });
+            }
+            res.json({ orders: rows });
+        }
+    );
+});
+
 // Display all columns of the orders table
 APP.get("/api/debug/orders/columns", (req, res) => {
     const db = new sqlite3.Database('./db/data.db');
