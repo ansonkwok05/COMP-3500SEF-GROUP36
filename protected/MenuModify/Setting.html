@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Settings</title>
+    <link rel="stylesheet" href="css/setting.css">
+</head>
+
+<body>
+
+<header class="top-header">
+    <h1>Restaurant Settings</h1>
+</header>
+
+<main class="settings-container">
+    <section class="settings-section">
+        <h2 class="section-title">Restaurant Information</h2>
+
+        <div class="form-group">
+            <label class="form-label">Restaurant Name</label>
+            <input type="text" class="form-input" id="restaurant-name" placeholder="Enter restaurant name">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Address</label>
+            <textarea class="form-textarea" id="restaurant-address" placeholder="Enter full address" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Cuisine Type</label>
+            <select class="form-select" id="cuisine-type">
+                <option value="">Select cuisine</option>
+                <option value="italian">Italian</option>
+                <option value="chinese">Chinese</option>
+                <option value="mexican">Mexican</option>
+                <option value="indian">Indian</option>
+                <option value="american">American</option>
+                <option value="japanese">Japanese</option>
+                <option value="thai">Thai</option>
+                <option value="french">French</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+    </section>
+
+    <section class="settings-section">
+        <h2 class="section-title">Menu Management</h2>
+        <p class="section-description">Add, edit, or remove menu items</p>
+
+        <div class="menu-items-list" id="menu-items-container">
+            <!-- Menu items will be dynamically added here -->
+        </div>
+
+        <button class="add-item-btn" id="add-menu-item">
+            <span class="icon">+</span>
+            Add Menu Item
+        </button>
+    </section>
+
+    <section class="settings-section">
+        <div class="actions-group">
+            <button class="save-btn" id="save-settings">Save Changes</button>
+            <button class="cancel-btn" id="cancel-changes">Cancel</button>
+        </div>
+    </section>
+</main>
+
+<nav class="bottom-navi-bar">
+    <a href="/restaurantList/restaurantList.html" class="nav-item">
+        <span class="icon">🏠</span>
+        <span class="label">Home</span>
+    </a>
+    <a href="/" class="nav-item" id="logout">
+        <span class="icon">👤</span>
+        <span class="label">Logout</span>
+    </a>
+</nav>
+
+<script src="js/settings.js"></script>
+</body>
+
+</html>
