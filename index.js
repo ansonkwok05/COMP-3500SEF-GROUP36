@@ -17,9 +17,12 @@ const RESTAURANT_M = require("./src/restaurant_M.js");
 const PORT = process.env.PORT || 8080;
 const ERR_MESSAGE = "404 Page not found";
 
+let db;
+
 // expose ./public folder, which everyone can access
 APP.use(EXPRESS.static("./public"));
 
+APP.use(BODYPARSER.json());
 APP.use(BODYPARSER.urlencoded({ extended: true }));
 
 // session for authentication after user log in
@@ -606,7 +609,7 @@ async function start_app() {
     // initialize sqlite database
     {
         let db_path = path.join(__dirname, "/db/data.db");
-        let db = new sqlite3.Database(db_path);
+        db = new sqlite3.Database(db_path);
 
         // initialize database tables
         db.serialize(() => {
@@ -620,7 +623,7 @@ async function start_app() {
                 "CREATE TABLE IF NOT EXISTS restaurants (r_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255) NOT NULL, address VARCHAR(255), cuisine VARCHAR(30), rating REAL, FOREIGN KEY (r_id) REFERENCES R_users (id))"
             );
             db.run(
-                "CREATE TABLE IF NOT EXISTS menu_items (m_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255), price REAL, description VARCHAR(255), r_id CHAR(16) NOT NULL, FOREIGN KEY (r_id) REFERENCES R_users (id))"
+                "CREATE TABLE IF NOT EXISTS menu_items (m_id CHAR(16) PRIMARY KEY NOT NULL, name VARCHAR(255), price REAL, description VARCHAR(255), r_id CHAR(16) NOT NULL,  quantity INTEGER ,FOREIGN KEY (r_id) REFERENCES R_users (id))"
             );
             db.run(
                 "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
@@ -653,38 +656,32 @@ async function start_app() {
 
             // load menu items
             let menu_items_prefix =
-                "INSERT OR REPLACE INTO menu_items (m_id, name, price, description, r_id)";
+                "INSERT OR REPLACE INTO menu_items (m_id, name, price, description, r_id, quantity)";
             db.run(
-                `${menu_items_prefix} VALUES ("sdfbhdfgert", "Big Mac", 46, "Burger with patty", "id1")`
+                `${menu_items_prefix} VALUES ("sdfbhdfgert", "Big Mac", 46, "Burger with patty", "id1", 10)`
             );
             db.run(
-                `${menu_items_prefix} VALUES ("dfgsfgd", "McChicken", 35, "Burger with crispy chicken", "id1")`
+                `${menu_items_prefix} VALUES ("dfgsfgd", "McChicken", 35, "Burger with crispy chicken", "id1", 10)`
             );
             db.run(
-                `${menu_items_prefix} VALUES ("wtw4t", "Chicken Bucket", 138.9, "6 pieces of crispy chicken", "id2")`
+                `${menu_items_prefix} VALUES ("wtw4t", "Chicken Bucket", 138.9, "6 pieces of crispy chicken", "id2", 10)`
             );
             db.run(
-                `${menu_items_prefix} VALUES ("34t4ta4ta", "Chicken Tenders", 82.67, "Chicken strips coated in seasoning", "id2")`
+                `${menu_items_prefix} VALUES ("34t4ta4ta", "Chicken Tenders", 82.67, "Chicken strips coated in seasoning", "id2", 10)`
             );
             db.run(
-                `${menu_items_prefix} VALUES ("w4tw44", "Pepperoni Supreme Pizza", 199, "Big pepperoni pizza", "id3")`
+                `${menu_items_prefix} VALUES ("w4tw44", "Pepperoni Supreme Pizza", 199, "Big pepperoni pizza", "id3", 10)`
             );
             db.run(
-                `${menu_items_prefix} VALUES ("ertetrateratawe", "Chicken Tenders", 58, "Chicken strips coated in seasoning", "id4")`
+                `${menu_items_prefix} VALUES ("ertetrateratawe", "Chicken Tenders", 58, "Chicken strips coated in seasoning", "id4", 10)`
             );
         });
 
-        await new Promise(resolve => {
-            db.close(() => {
                 USER_MANAGER.initialize_db(db_path);
                 RESTAURANT.initialize_db(db_path);
                 CART_MANAGER.initialize_db(db_path);
                 SHOP_OWNER_INFO.initialize_db(db_path);
                 RESTAURANT_M.initialize_db(db_path);
-
-                resolve();
-            });
-        })
 
         console.log("SQLite database initialized");
     }
