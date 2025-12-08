@@ -60,6 +60,8 @@ body {
 
 #main_container .input_container {
     position: relative;
+    margin-bottom: 22px; 
+    width: 100%;
 }
 
 #main_container .input_box {
