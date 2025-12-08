@@ -30,7 +30,31 @@
     <h1>Payment Successful!</h1>
     <p>Your order has been confirmed.</p>
     <p>Thank you for your purchase!</p>
-    <button onclick="goBack()" class="back-btn">Back to Payment</button>
+    <div style="margin: 35px 0;">
+        <a href="/restaurantList/restaurantList.html" 
+           style="
+               display: inline-block;
+               padding: 14px 32px;
+               background: #3498db;
+               color: white;
+               font-size: 18px;
+               font-family: Arial, sans-serif;
+               text-decoration: none;
+               border-radius: 8px;
+               box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+               transition: all 0.2s;
+           "
+           onmouseover="this.style.background='#2980b9'; this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.background='#3498db'; this.style.transform='translateY(0)'">
+            Continue Shopping
+        </a>
+    </div>
+
+    <div>
+        <a href="/order_tracking/OrderStatus.html" style="color:#95a5a6; text-decoration:none;">
+            View order status →
+        </a>
+    </div>
     
     <script>
     //food order part
