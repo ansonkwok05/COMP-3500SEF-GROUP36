@@ -4,6 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+    <list default="true" id="5f666554-2876-4b1a-900f-11b7b84c4eb4" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/protected/MenuModify/js/Setting.js" beforeDir="false" afterPath="$PROJECT_DIR$/protected/MenuModify/js/Setting.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/restaurant_M.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/restaurant_M.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -42,7 +48,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "git-widget-placeholder": "Hin__testing",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)"
   }
+}]]></component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="COMP-3500SEF-GROUP36" />
@@ -58,16 +72,10 @@
       </method>
     </configuration>
   </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-      </set>
-    </attachedChunks>
-  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="681747be-8677-449d-83f3-3635ec88f3b0" name="Changes" comment="" />
+      <changelist id="b6cdc1b4-0603-43c7-bcbf-cc58326db2aa" name="Changes" comment="" />
       <created>1764754917194</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -90,6 +98,7 @@
       <workItem from="1764842283040" duration="401000" />
       <workItem from="1764873778874" duration="2333000" />
       <workItem from="1765035095146" duration="1385000" />
+      <workItem from="1765207138542" duration="605000" />
     </task>
     <servers />
   </component>
