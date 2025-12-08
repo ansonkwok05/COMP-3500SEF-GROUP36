@@ -8,8 +8,14 @@
 </head>
 
 <body>
-<header class="top-header">
-    <h1>Restaurant Dashboard</h1>
+<header>
+    <h1>Shop Owner Dashboard</h1>
+    <div class="header-actions">
+        <a href="/protected/MenuModify/settings.html" class="btn-settings">
+            ⚙️ Settings
+        </a>
+        <a href="/logout" class="btn-logout">Logout</a>
+    </div>
 </header>
 
 <div class="dashboard-container">
@@ -33,10 +39,6 @@
             <!-- Menu items will be loaded here dynamically -->
             <div class="loading">Loading menu items...</div>
         </div>
-    </div>
-
-    <div class="logout-section">
-        <button class="logout-btn" id="logout-btn">Logout</button>
     </div>
 </div>
 

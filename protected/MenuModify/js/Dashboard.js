@@ -2,6 +2,15 @@ let currentItemId = null;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+
+    const logoutBtn = document.querySelector('.btn-logout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/logout';
+        });
+    }
+
     // Load initial data
     loadRestaurantInfo();
     loadMenuItems();
