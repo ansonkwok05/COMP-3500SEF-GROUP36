@@ -70,9 +70,22 @@ async function login_user(email, password) {
 }
 
 async function get_user_id(email) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+        if (!email) {
+            reject(new Error("Email is required"));
+            return;
+        }
+
         db.get("SELECT id FROM users WHERE email = ?", [email], (err, row) => {
-            resolve(row.id);
+            if (err) {
+                console.error('Database error in get_user_id:', err);
+                reject(err);
+            } else if (!row) {
+                console.warn(`No user found with email: ${email}`);
+                resolve(null); // Return null instead of throwing
+            } else {
+                resolve(row.id);
+            }
         });
     });
 }

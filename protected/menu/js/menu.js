@@ -16,7 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    fetch(`/api/restaurants/menu/${restaurantID}`)
+    fetch(`/api/restaurants/menu/${restaurantID}`, {
+        credentials: 'include'
+    })
         .then(res => res.ok ? res.json() : Promise.reject(res))
         .then(json => {
             if (!json?.menu_items || Object.keys(json.menu_items).length === 0) {
@@ -60,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.textContent = 'Adding...';
 
         try {
-            await fetch(`/api/cart/add/${itemId}`, { method: 'POST' });
+            await fetch(`/api/cart/add/${itemId}`, { method: 'POST',credentials: 'include' });
 
             button.textContent = 'Added!';
             button.style.backgroundColor = '#27ae60';
@@ -83,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function updateCartUI() {
         try {
-            const res = await fetch('/api/cart');
+            const res = await fetch('/api/cart',{ credentials: 'include' });
             if (!res.ok) throw new Error();
             const { items } = await res.json();
 
@@ -156,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return removeFromCart(itemId);
             }
 
-            await fetch(`/api/cart/change/${itemId}/${newQty}`, { method: 'PUT' });
+            await fetch(`/api/cart/change/${itemId}/${newQty}`, { method: 'PUT', credentials: 'include' });
             updateCartUI();
         } catch (err) {
             alert('Failed to update quantity');
@@ -165,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function removeFromCart(itemId) {
         try {
-            await fetch(`/api/cart/remove/${itemId}`, { method: 'DELETE' });
+            await fetch(`/api/cart/remove/${itemId}`, { method: 'DELETE',credentials: 'include' });
             updateCartUI();
         } catch (err) {
             alert('Failed to remove item');
@@ -185,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     }
 
+
     shoppingCartBtn.addEventListener('click', openCart);
     cartCloseBtn.addEventListener('click', closeCart);
     cartOverlay.addEventListener('click', closeCart);
@@ -192,9 +195,78 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape' && cartContainer.classList.contains('active')) closeCart();
     });
 
-    checkoutBtn.addEventListener('click', () => {
+    checkoutBtn.addEventListener('click', async () => {
         if (!checkoutBtn.disabled) {
-            window.location.href = '/payment/payment.html';
+            try {
+                // First, get the current cart contents
+                const cartRes = await fetch('/api/cart', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!cartRes.ok) {
+                    throw new Error('Failed to fetch cart');
+                }
+
+                const cartData = await cartRes.json();
+
+                if (!cartData.items || cartData.items.length === 0) {
+                    alert('Your cart is empty!');
+                    return;
+                }
+
+                // Show loading state
+                checkoutBtn.disabled = true;
+                const originalText = checkoutBtn.textContent;
+                checkoutBtn.textContent = 'Creating Order...';
+
+                // Create order from cart
+                const orderResponse = await fetch('/api/orders/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        items: cartData.items
+                    })
+                });
+
+                if (!orderResponse.ok) {
+                    const error = await orderResponse.json();
+                    throw new Error(error.error || 'Failed to create order');
+                }
+
+                const orderData = await orderResponse.json();
+
+                // Clear cart after successful order creation
+                await fetch('/api/cart/clear', {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                // Update cart UI
+                updateCartUI();
+
+                // Show success message
+                checkoutBtn.textContent = 'Order Created!';
+                checkoutBtn.style.backgroundColor = '#27ae60';
+
+                // Wait a moment then redirect to payment
+                setTimeout(() => {
+                    // Pass order ID to payment page
+                    window.location.href = `/payment/payment.html?orderId=${orderData.orderId}`;
+                }, 1000);
+
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert(`Checkout failed: ${error.message}`);
+
+                // Reset button
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Checkout';
+                checkoutBtn.style.backgroundColor = '';
+            }
         }
     });
 });

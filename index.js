@@ -13,6 +13,7 @@ const RESTAURANT = require("./src/restaurant.js");
 const CART_MANAGER = require("./src/cart_manager.js");
 const SHOP_OWNER_INFO = require("./src/Shop_owner_infos.js");
 const RESTAURANT_M = require("./src/restaurant_M.js");
+const ORDER_MANAGER = require("./src/order_M.js");
 
 const PORT = process.env.PORT || 8080;
 const ERR_MESSAGE = "404 Page not found";
@@ -68,6 +69,9 @@ APP.post("/login", async (req, res) => {
         // set session email and userID so user only need to sign in once per session
         req.session.email = email;
         req.session.userID = await USER_MANAGER.get_user_id(email);
+        req.session.isShopOwner = false;
+        req.session.isDelivery = false;
+        req.session.isCustomer = true;
         res.redirect("/restaurantList/restaurantList.html");
     } else {
         console.log(`Login Fail: ${email}, ${password}`);
@@ -120,6 +124,8 @@ APP.post("/deli_login", async (req, res) => {
         req.session.email = email;
         req.session.userID = await USER_MANAGER.get_user_id(email);
         req.session.isDelivery = true;
+        req.session.isCustomer = false;
+        req.session.isShopOwner = false;
 
         res.redirect("/DeliTakeOrder/TakeOrder.html");
 
@@ -142,6 +148,8 @@ APP.post("/ShopOwnerReg", async (req, res) => {
         req.session.email = email;
         req.session.userID = await SHOP_OWNER_INFO.get_R_users_id(email);
         req.session.isShopOwner = true;
+        req.session.isDelivery = false;
+        req.session.isCustomer = false;
 
         res.redirect("/protected/MenuModify/Dashboard.html");
     } else {
@@ -516,6 +524,140 @@ APP.delete("/api/shopowner/menu/:id", async (req, res) => {
     }
 });
 
+APP.get("/api/shopowner/orders", async (req, res) => {
+    if (!req.session.isShopOwner) {
+        return res.status(403).json({ error: "Access denied" });
+    }
+    try {
+        const restaurant = await new Promise((resolve) => {
+            db.get("SELECT r_id FROM restaurants WHERE r_id = ?", [req.session.userID], (err, row) => {
+                if (err) {
+                    console.error("Error getting restaurant:", err);
+                    resolve(null);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+
+        if (!restaurant) {
+            // Shop owner doesn't have a restaurant yet
+            return res.status(200).json({ orders: [] });
+        }
+
+        // Now get orders for this restaurant
+        const orders = await ORDER_MANAGER.getOrdersForRestaurant(req.session.userID);
+        res.status(200).json({ orders });
+    } catch (error) {
+        console.error("Error getting orders:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Accept order (shop owner)
+APP.post("/api/shopowner/orders/:id/accept", async (req, res) => {
+    if (!req.session.isShopOwner) {
+        return res.status(403).json({ error: "Access denied" });
+    }
+
+    const orderId = req.params.id;
+    const restaurantId = req.session.userID;
+
+    try {
+        await ORDER_MANAGER.acceptOrder(orderId, restaurantId);
+        res.status(200).json({
+            success: true,
+            message: "Order accepted successfully"
+        });
+    } catch (error) {
+        console.error("Error accepting order:", error);
+
+        if (error.error === "Insufficient stock") {
+            return res.status(400).json({
+                error: "Insufficient stock",
+                items: error.items
+            });
+        }
+
+        res.status(500).json({ error: "Failed to accept order" });
+    }
+});
+
+// Reject order (shop owner)
+APP.post("/api/shopowner/orders/:id/reject", async (req, res) => {
+    if (!req.session.isShopOwner) {
+        return res.status(403).json({ error: "Access denied" });
+    }
+
+    const orderId = req.params.id;
+    const restaurantId = req.session.userID;
+    const { reason } = req.body;
+
+    try {
+        const success = await ORDER_MANAGER.rejectOrder(orderId, restaurantId, reason || "");
+
+        if (!success) {
+            return res.status(404).json({ error: "Order not found or already processed" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Order rejected successfully"
+        });
+    } catch (error) {
+        console.error("Error rejecting order:", error);
+        res.status(500).json({ error: "Failed to reject order" });
+    }
+});
+
+//Get available orders for deliverymen
+APP.get("/api/delivery/available_orders", async (req, res) => {
+    if (!req.session?.userID || !req.session?.isDelivery) {
+        return res.status(403).json({ error: "Access denied" });
+    }
+
+    const db = new sqlite3.Database('./db/data.db');
+
+    db.all(`
+        SELECT * FROM orders 
+        WHERE status = 'prepared' AND deliverymanID IS NULL 
+        ORDER BY created_at DESC
+    `, [], (err, rows) => {
+        if (err) {
+            console.error("Error:", err);
+            res.status(500).json({ error: "Unable to fetch orders" });
+        } else {
+            res.status(200).json({ orders: rows || [] });
+        }
+        db.close();
+    });
+});
+// Mark order as prepared (shop owner)
+APP.post("/api/shopowner/orders/:id/prepare", async (req, res) => {
+    if (!req.session.isShopOwner) {
+        return res.status(403).json({ error: "Access denied" });
+    }
+
+    const orderId = req.params.id;
+    const restaurantId = req.session.userID;
+
+    try {
+        const success = await ORDER_MANAGER.updateOrderStatus(orderId, "prepared", restaurantId);
+
+        if (!success) {
+            return res.status(404).json({ error: "Order not found or not in accepted state" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Order marked as prepared"
+        });
+    } catch (error) {
+        console.error("Error marking as prepared:", error);
+        res.status(500).json({ error: "Failed to update order" });
+    }
+});
+
 // only logged in users can access under this
 
 APP.use(
@@ -655,6 +797,67 @@ APP.post("/api/create_order", async (req, res) => {
     });
 });
 
+// Simple order creation from cart
+APP.post("/api/orders/create", async (req, res) => {
+    try {
+        // Get user from session
+        const userId = req.session.userID;
+        if (!userId) {
+            return res.status(401).json({ error: "User not logged in" });
+        }
+
+        const { items } = req.body;
+
+        if (!items || items.length === 0) {
+            return res.status(400).json({ error: "Cart is empty" });
+        }
+
+        console.log("Creating order for user:", userId);
+        console.log("Order items:", items);
+
+        // Get restaurant ID from first item
+        const firstItemId = items[0].id;
+        const restaurant = await new Promise((resolve) => {
+            db.get("SELECT r_id FROM menu_items WHERE m_id = ?", [firstItemId], (err, row) => {
+                if (err) {
+                    console.error("Error getting restaurant:", err);
+                    resolve(null);
+                } else {
+                    console.log("Found restaurant:", row ? row.r_id : "none");
+                    resolve(row ? row.r_id : null);
+                }
+            });
+        });
+
+        if (!restaurant) {
+            return res.status(400).json({ error: "Cannot find restaurant for these items" });
+        }
+
+        // Format cart items for ORDER_MANAGER
+        const cartItems = items.map(item => ({
+            m_id: item.id,
+            quantity: item.quantity,
+            price: item.price
+        }));
+
+        // Use ORDER_MANAGER to create order
+        console.log("Calling ORDER_MANAGER.createOrder...");
+        const orderResult = await ORDER_MANAGER.createOrder(userId, restaurant, cartItems, "");
+
+        // Clear cart after successful order creation
+        await CART_MANAGER.clear_cart(userId);
+
+        res.status(201).json({
+            success: true,
+            orderId: orderResult.orderId,
+            message: "Order created successfully"
+        });
+
+    } catch (error) {
+        console.error("Order creation error:", error);
+        res.status(500).json({ error: error.message || "Failed to create order" });
+    }
+});
 APP.get("/api/all_orders", async (req, res) => {
     const db = new sqlite3.Database('./db/data.db');
 
@@ -756,7 +959,9 @@ APP.use(
 APP.get("/logout", (req, res) => {
     req.session.email = null;
     req.session.userID = null;
-    res.redirect("/login.html");
+    req.session.destroy(() => {
+        res.redirect("/login.html");
+    });
 });
 
 // send error page to all unknown route
@@ -796,9 +1001,12 @@ async function start_app() {
             db.run(
                 "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
             );
-            db.run(
-                "CREATE TABLE IF NOT EXISTS orders (id VARCHAR(50) PRIMARY KEY NOT NULL, userID CHAR(16) NOT NULL, deliverymanID CHAR(16), status VARCHAR(50) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (userID) REFERENCES users (id), FOREIGN KEY (deliverymanID) REFERENCES users (id))"
+            db.run(`
+            CREATE TABLE IF NOT EXISTS orders ( id VARCHAR(50) PRIMARY KEY NOT NULL, userID CHAR(16) NOT NULL, restaurant_id CHAR(16), status VARCHAR(50) NOT NULL DEFAULT 'pending', total_amount REAL DEFAULT 0, notes TEXT, deliverymanID CHAR(16), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (userID) REFERENCES users (id), FOREIGN KEY (restaurant_id) REFERENCES restaurants (r_id), FOREIGN KEY (deliverymanID) REFERENCES users (id) )`
             );
+            db.run(`CREATE TABLE IF NOT EXISTS order_items (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id VARCHAR(50) NOT NULL, menu_item_id CHAR(16) NOT NULL, quantity INTEGER NOT NULL, subtotal REAL NOT NULL, FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE, FOREIGN KEY (menu_item_id) REFERENCES menu_items (m_id))`
+            );
+
         });
 
         // initialize example data
@@ -843,8 +1051,9 @@ async function start_app() {
                 `${menu_items_prefix} VALUES ("w4tw44", "Pepperoni Supreme Pizza", 199, "Big pepperoni pizza", "id3", 10)`
             );
             db.run(
-                `${menu_items_prefix} VALUES ("ertetrateratawe", "Chicken Tenders", 58, "Chicken strips coated in seasoning", "id4", 10)`
-            );
+                `${menu_items_prefix} VALUES ("ertetrateratawe", "Chicken Tenders", 58, "Chicken strips coated in seasoning", "id4", 10)`);
+
+
         });
 
         USER_MANAGER.initialize_db(db_path);
@@ -852,6 +1061,7 @@ async function start_app() {
         CART_MANAGER.initialize_db(db_path);
         SHOP_OWNER_INFO.initialize_db(db_path);
         RESTAURANT_M.initialize_db(db_path);
+        ORDER_MANAGER.initialize_db(db_path);
 
         console.log("SQLite database initialized");
     }

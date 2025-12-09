@@ -1,4 +1,5 @@
 let currentItemId = null;
+let orders = [];
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -19,10 +20,34 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRestaurantInfo();
     loadMenuItems();
 
+    // Setup tab switching if tabs exist
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    if (tabBtns.length > 0) {
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                switchTab(this.dataset.tab);
+            });
+        });
+
+        // Load orders if on orders tab
+        if (window.location.hash === '#orders' || document.querySelector('.tab-btn[data-tab="orders"]')?.classList.contains('active')) {
+            loadOrders();
+        }
+    } else {
+        // If no tabs, just load orders
+        loadOrders();
+    }
+
     // Setup event listeners
     document.getElementById('add-item-btn').addEventListener('click', showAddModal);
     document.getElementById('modal-save-btn').addEventListener('click', saveMenuItem);
     document.getElementById('modal-cancel-btn').addEventListener('click', hideModal);
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            switchTab(this.dataset.tab);
+        });
+    });
 
     // Close modal when clicking outside
     document.getElementById('item-modal').addEventListener('click', function(e) {
@@ -36,6 +61,206 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Add tab switching function
+function switchTab(tabName) {
+    // Update active tab button
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabName) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Show/hide tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+        if (content.id === tabName + '-tab') {
+            content.classList.add('active');
+        }
+    });
+
+    // Refresh data if needed
+    if (tabName === 'orders') {
+        loadOrders();
+    } else if (tabName === 'menu') {
+        loadMenuItems();
+    }
+}
+
+// Add this function to load orders for the shop owner
+async function loadOrders() {
+    try {
+        console.log('Loading orders...');
+        const response = await fetch('/api/shopowner/orders', {
+            credentials: 'include'
+        });
+
+        console.log('Orders response status:', response.status);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Orders loaded:', data.orders?.length || 0, 'orders');
+            orders = data.orders || [];
+            renderOrders();
+        } else if (response.status === 404) {
+            console.log('No orders found');
+            renderOrders([]);
+        } else {
+            throw new Error(`Failed to load orders: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        document.getElementById('orders-container').innerHTML =
+            '<div class="no-items">❌ Error loading orders. Please try again.</div>';
+    }
+}
+
+// Add function to render orders
+function renderOrders() {
+    const container = document.getElementById('orders-container');
+
+    if (!orders || orders.length === 0) {
+        container.innerHTML = '<div class="no-items">📝 No pending orders yet.</div>';
+        return;
+    }
+
+    const ordersHTML = orders.map(order => `
+        <div class="order-card" data-id="${order.id}">
+            <div class="order-header">
+                <h3>Order #${order.id.substring(0, 8)}</h3>
+                <span class="order-status ${order.status}">${order.status}</span>
+            </div>
+            
+            <div class="order-details">
+                <div class="order-info">
+                    <p><strong>Customer:</strong> ${escapeHtml(order.customer_name || 'Unknown')}</p>
+                    <p><strong>Address:</strong> ${escapeHtml(order.customer_address || 'N/A')}</p>
+                    <p><strong>Total:</strong> $${parseFloat(order.total_amount || 0).toFixed(2)}</p>
+                    <p><strong>Placed:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                </div>
+                
+                <div class="order-items">
+                    <h4>Items:</h4>
+                    <ul>
+                        ${(order.items || []).map(item => `
+                            <li>${escapeHtml(item.name)} x ${item.quantity} - $${parseFloat(item.price * item.quantity).toFixed(2)}</li>
+                        `).join('')}
+                    </ul>
+                </div>
+                
+                <div class="order-notes">
+                    <p><strong>Notes:</strong> ${escapeHtml(order.notes || 'No special instructions')}</p>
+                </div>
+            </div>
+            
+            <div class="order-actions">
+                ${order.status === 'pending' ? `
+                    <button class="accept-btn" onclick="acceptOrder('${order.id}')">✅ Accept Order</button>
+                    <button class="reject-btn" onclick="rejectOrder('${order.id}')">❌ Reject Order</button>
+                ` : order.status === 'accepted' ? `
+                    <button class="prepare-btn" onclick="markAsPrepared('${order.id}')">👨‍🍳 Mark as Prepared</button>
+                ` : order.status === 'prepared' ? `
+                    <span class="status-label">Ready for pickup</span>
+                ` : order.status === 'rejected' ? `
+                    <span class="status-label rejected">Order Rejected</span>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+
+    container.innerHTML = ordersHTML;
+}
+
+// Add function to accept an order
+async function acceptOrder(orderId) {
+    if (!confirm('Are you sure you want to accept this order?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/shopowner/orders/${orderId}/accept`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            showMessage('✅ Order accepted successfully!', 'success');
+            loadOrders();
+        } else {
+            const error = await response.json();
+            showMessage(`❌ Failed to accept order: ${error.error || 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error accepting order:', error);
+        showMessage('❌ Network error. Please try again.', 'error');
+    }
+}
+
+// Add function to reject an order
+async function rejectOrder(orderId) {
+    const reason = prompt('Please enter a reason for rejecting this order:');
+    if (reason === null) return; // User cancelled
+
+    if (!reason.trim()) {
+        showMessage('Please provide a reason for rejection.', 'error');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to reject this order?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/shopowner/orders/${orderId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reason }),
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            showMessage('✅ Order rejected successfully!', 'success');
+            loadOrders();
+        } else {
+            const error = await response.json();
+            showMessage(`❌ Failed to reject order: ${error.error || 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error rejecting order:', error);
+        showMessage('❌ Network error. Please try again.', 'error');
+    }
+}
+
+// Add function to mark order as prepared
+async function markAsPrepared(orderId) {
+    try {
+        const response = await fetch(`/api/shopowner/orders/${orderId}/prepare`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            showMessage('✅ Order marked as prepared!', 'success');
+            loadOrders();
+        } else {
+            const error = await response.json();
+            showMessage(`❌ Failed to update order: ${error.error || 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error marking order as prepared:', error);
+        showMessage('❌ Network error. Please try again.', 'error');
+    }
+}
+
+// Add auto-refresh for orders every 30 seconds
+setInterval(() => {
+    if (document.querySelector('.tab-btn[data-tab="orders"].active')) {
+        loadOrders();
+    }
+}, 30000);
 
 // Load restaurant information
 async function loadRestaurantInfo() {
@@ -404,15 +629,11 @@ async function deleteItem(itemId) {
         return;
     }
 
-    console.log('Deleting menu item:', itemId);
-
     try {
         const response = await fetch(`/api/shopowner/menu/${itemId}`, {
             method: 'DELETE',
-            credentials: 'include' // IMPORTANT: Send session cookies
+            credentials: 'include'
         });
-
-        console.log('Delete response:', response.status);
 
         if (response.ok) {
             showMessage('✅ Menu item deleted successfully!', 'success');

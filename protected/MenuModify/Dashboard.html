@@ -29,15 +29,39 @@
         </div>
     </div>
 
-    <div class="menu-section">
-        <div class="section-header">
-            <h2>Menu Items Management</h2>
-            <button class="add-btn" id="add-item-btn">Add New Item</button>
-        </div>
+    <!-- Add Tabs Navigation -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="menu">📋 Menu Items</button>
+        <button class="tab-btn" data-tab="orders">📦 Orders</button>
+    </div>
 
-        <div class="menu-items" id="menu-items">
-            <!-- Menu items will be loaded here dynamically -->
-            <div class="loading">Loading menu items...</div>
+    <!-- Menu Tab -->
+    <div class="tab-content active" id="menu-tab">
+        <div class="menu-section">
+            <div class="section-header">
+                <h2>Menu Items Management</h2>
+                <button class="add-btn" id="add-item-btn">Add New Item</button>
+            </div>
+
+            <div class="menu-items" id="menu-items">
+                <!-- Menu items will be loaded here dynamically -->
+                <div class="loading">Loading menu items...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Tab -->
+    <div class="tab-content" id="orders-tab">
+        <div class="menu-section">
+            <div class="section-header">
+                <h2>📦 Order Management</h2>
+                <button class="add-btn" onclick="loadOrders()">🔄 Refresh Orders</button>
+            </div>
+
+            <div class="menu-items" id="orders-container">
+                <!-- Orders will be loaded here dynamically -->
+                <div class="loading">Loading orders...</div>
+            </div>
         </div>
     </div>
 </div>
