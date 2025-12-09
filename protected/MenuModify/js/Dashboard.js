@@ -2,12 +2,16 @@ let currentItemId = null;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard initialized');
 
+    // Setup logout button (using class selector)
     const logoutBtn = document.querySelector('.btn-logout');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            window.location.href = '/logout';
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
         });
     }
 
@@ -17,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup event listeners
     document.getElementById('add-item-btn').addEventListener('click', showAddModal);
-    document.getElementById('logout-btn').addEventListener('click', logout);
     document.getElementById('modal-save-btn').addEventListener('click', saveMenuItem);
     document.getElementById('modal-cancel-btn').addEventListener('click', hideModal);
 
@@ -25,15 +28,26 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('item-modal').addEventListener('click', function(e) {
         if (e.target === this) hideModal();
     });
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideModal();
+        }
+    });
 });
 
 // Load restaurant information
 async function loadRestaurantInfo() {
     try {
-        const response = await fetch('/api/shopowner/restaurant');
+        console.log('Loading restaurant info...');
+        const response = await fetch('/api/shopowner/restaurant', {
+            credentials: 'include' // IMPORTANT: Send session cookies
+        });
 
         if (response.ok) {
             const restaurant = await response.json();
+            console.log('Restaurant data loaded:', restaurant);
 
             // Format and display restaurant info
             document.getElementById('restaurant-name').textContent =
@@ -42,11 +56,23 @@ async function loadRestaurantInfo() {
                 `📍 ${restaurant.address || 'No address provided'}`;
             document.getElementById('restaurant-cuisine').textContent =
                 `🍽️ ${restaurant.cuisine || 'No cuisine specified'}`;
+        } else if (response.status === 404) {
+            console.warn('No restaurant found for this shop owner');
+            document.getElementById('restaurant-name').textContent = '🏪 No restaurant setup yet';
+            document.getElementById('restaurant-address').textContent = '📍 Please set up your restaurant in Settings';
+            document.getElementById('restaurant-cuisine').textContent = '🍽️ Visit Settings to get started';
+        } else if (response.status === 403) {
+            console.error('Access denied - not a shop owner');
+            showMessage('Access denied. Please log in as a shop owner.', 'error');
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 3000);
         } else {
-            console.error('Failed to load restaurant info');
+            console.error('Failed to load restaurant info:', response.status);
         }
     } catch (error) {
         console.error('Error loading restaurant:', error);
+        showMessage('Network error loading restaurant info', 'error');
     }
 }
 
@@ -57,18 +83,32 @@ async function loadMenuItems() {
         const container = document.getElementById('menu-items');
         container.innerHTML = '<div class="loading">Loading menu items...</div>';
 
-        const response = await fetch('/api/shopowner/menu');
+        console.log('Loading menu items...');
+        const response = await fetch('/api/shopowner/menu', {
+            credentials: 'include' // IMPORTANT: Send session cookies
+        });
+
+        console.log('Menu response status:', response.status);
 
         if (response.ok) {
             const data = await response.json();
+            console.log('Menu items loaded:', data.menu_items?.length || 0, 'items');
             renderMenuItems(data.menu_items || []);
+        } else if (response.status === 404) {
+            console.log('No menu items found');
+            renderMenuItems([]);
+        } else if (response.status === 403) {
+            showMessage('Access denied. Please log in as a shop owner.', 'error');
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 3000);
         } else {
-            throw new Error('Failed to load menu items');
+            throw new Error(`Failed to load menu items: ${response.status}`);
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error loading menu items:', error);
         document.getElementById('menu-items').innerHTML =
-            '<div class="no-items">Error loading menu items. Please try again.</div>';
+            '<div class="no-items">❌ Error loading menu items. Please try again.</div>';
     }
 }
 
@@ -77,7 +117,7 @@ function renderMenuItems(items) {
     const container = document.getElementById('menu-items');
 
     if (items.length === 0) {
-        container.innerHTML = '<div class="no-items">No menu items yet. Add your first item!</div>';
+        container.innerHTML = '<div class="no-items">📝 No menu items yet. Click "Add New Item" to get started!</div>';
         return;
     }
 
@@ -90,7 +130,7 @@ function renderMenuItems(items) {
                 <div class="item-price">$${parseFloat(item.price).toFixed(2)}</div>
                 
                 <div class="quantity-controls">
-                    <span class="quantity-label">Quantity:</span>
+                    <span class="quantity-label">Quantity in Stock:</span>
                     <input type="number" 
                            class="quantity-input" 
                            value="${item.quantity || 0}" 
@@ -117,6 +157,8 @@ async function updateQuantity(itemId, quantity) {
         return;
     }
 
+    console.log('Updating quantity for item', itemId, 'to', quantity);
+
     try {
         const response = await fetch(`/api/shopowner/menu/${itemId}`, {
             method: 'PUT',
@@ -125,17 +167,23 @@ async function updateQuantity(itemId, quantity) {
             },
             body: JSON.stringify({
                 quantity: parseInt(quantity)
-            })
+            }),
+            credentials: 'include' // IMPORTANT: Send session cookies
         });
 
+        console.log('Quantity update response:', response.status);
+
         if (response.ok) {
-            showMessage('Quantity updated successfully!', 'success');
+            showMessage('✅ Quantity updated successfully!', 'success');
+            // Reload menu items to get fresh data
+            setTimeout(loadMenuItems, 500);
         } else {
-            showMessage('Failed to update quantity', 'error');
+            const error = await response.json();
+            showMessage(`❌ Failed to update quantity: ${error.error || 'Unknown error'}`, 'error');
         }
     } catch (error) {
         console.error('Error updating quantity:', error);
-        showMessage('Network error. Please try again.', 'error');
+        showMessage('❌ Network error. Please try again.', 'error');
     }
 }
 
@@ -174,8 +222,15 @@ function showAddModal() {
 
 // Edit existing menu item
 async function editItem(itemId) {
+    console.log('Editing item:', itemId);
+
     try {
-        const response = await fetch('/api/shopowner/menu');
+        const response = await fetch('/api/shopowner/menu', {
+            credentials: 'include' // IMPORTANT: Send session cookies
+        });
+
+        console.log('Edit fetch response:', response.status);
+
         if (response.ok) {
             const data = await response.json();
             const item = data.menu_items.find(i => i.id === itemId);
@@ -198,17 +253,22 @@ async function editItem(itemId) {
                 // Show modal
                 document.getElementById('item-modal').style.display = 'flex';
                 document.getElementById('item-name').focus();
+            } else {
+                showMessage('Item not found', 'error');
             }
+        } else {
+            showMessage('Failed to load item details', 'error');
         }
     } catch (error) {
         console.error('Error loading item:', error);
-        showMessage('Failed to load item details', 'error');
+        showMessage('❌ Failed to load item details', 'error');
     }
 }
 
 // Hide modal
 function hideModal() {
     document.getElementById('item-modal').style.display = 'none';
+    currentItemId = null;
 }
 
 // Save menu item (add or update)
@@ -218,6 +278,8 @@ async function saveMenuItem() {
     const price = document.getElementById('item-price').value;
     const description = document.getElementById('item-description').value.trim();
     const quantity = document.getElementById('item-quantity').value;
+
+    console.log('Saving item:', { name, price, description, quantity, currentItemId });
 
     // Validate inputs
     let isValid = true;
@@ -247,7 +309,7 @@ async function saveMenuItem() {
     }
 
     if (!isValid) {
-        showMessage('Please fill in all required fields correctly', 'error');
+        showMessage('❌ Please fill in all required fields correctly', 'error');
         return;
     }
 
@@ -261,12 +323,14 @@ async function saveMenuItem() {
         }
     } catch (error) {
         console.error('Error saving item:', error);
-        showMessage('Failed to save menu item. Please try again.', 'error');
+        showMessage('❌ Failed to save menu item. Please try again.', 'error');
     }
 }
 
 // Add new menu item
 async function addMenuItem(name, price, description, quantity) {
+    console.log('Adding new menu item...');
+
     const response = await fetch('/api/shopowner/menu', {
         method: 'POST',
         headers: {
@@ -276,28 +340,37 @@ async function addMenuItem(name, price, description, quantity) {
             name,
             price: parseFloat(price),
             description
-        })
+        }),
+        credentials: 'include' // IMPORTANT: Send session cookies
     });
 
+    console.log('Add item response:', response.status);
+
     if (response.ok) {
+        const data = await response.json();
+        console.log('Item added with ID:', data.id);
+
         // If quantity is not 0, update it
         const qty = parseInt(quantity);
         if (qty > 0) {
-            const data = await response.json();
+            console.log('Updating quantity for new item...');
             await updateQuantity(data.id, qty);
         }
 
-        showMessage('Menu item added successfully!', 'success');
+        showMessage('✅ Menu item added successfully!', 'success');
         hideModal();
         loadMenuItems();
     } else {
         const error = await response.json();
-        showMessage(`Failed to add item: ${error.error || 'Unknown error'}`, 'error');
+        console.error('Add item failed:', error);
+        showMessage(`❌ Failed to add item: ${error.error || 'Unknown error'}`, 'error');
     }
 }
 
 // Update existing menu item
 async function updateMenuItem(itemId, name, price, description, quantity) {
+    console.log('Updating menu item:', itemId);
+
     const response = await fetch(`/api/shopowner/menu/${itemId}`, {
         method: 'PUT',
         headers: {
@@ -308,46 +381,49 @@ async function updateMenuItem(itemId, name, price, description, quantity) {
             price: parseFloat(price),
             description,
             quantity: parseInt(quantity)
-        })
+        }),
+        credentials: 'include' // IMPORTANT: Send session cookies
     });
 
+    console.log('Update item response:', response.status);
+
     if (response.ok) {
-        showMessage('Menu item updated successfully!', 'success');
+        showMessage('✅ Menu item updated successfully!', 'success');
         hideModal();
         loadMenuItems();
     } else {
         const error = await response.json();
-        showMessage(`Failed to update item: ${error.error || 'Unknown error'}`, 'error');
+        console.error('Update item failed:', error);
+        showMessage(`❌ Failed to update item: ${error.error || 'Unknown error'}`, 'error');
     }
 }
 
 // Delete menu item
 async function deleteItem(itemId) {
-    if (!confirm('Are you sure you want to delete this menu item? This action cannot be undone.')) {
+    if (!confirm('⚠️ Are you sure you want to delete this menu item? This action cannot be undone.')) {
         return;
     }
 
+    console.log('Deleting menu item:', itemId);
+
     try {
         const response = await fetch(`/api/shopowner/menu/${itemId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include' // IMPORTANT: Send session cookies
         });
 
+        console.log('Delete response:', response.status);
+
         if (response.ok) {
-            showMessage('Menu item deleted successfully!', 'success');
+            showMessage('✅ Menu item deleted successfully!', 'success');
             loadMenuItems();
         } else {
-            showMessage('Failed to delete menu item', 'error');
+            const error = await response.json();
+            showMessage(`❌ Failed to delete: ${error.error || 'Unknown error'}`, 'error');
         }
     } catch (error) {
         console.error('Error deleting item:', error);
-        showMessage('Network error. Please try again.', 'error');
-    }
-}
-
-// Logout function
-function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        window.location.href = '/logout';
+        showMessage('❌ Network error. Please try again.', 'error');
     }
 }
 

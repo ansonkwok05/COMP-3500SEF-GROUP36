@@ -205,23 +205,17 @@ APP.use(
 
 APP.use(
     "/protected/MenuModify/settings/",
-    EXPRESS.static(path.join(__dirname, "/protected/MenuModify/settings"))
+    EXPRESS.static(path.join(__dirname, "/protected/MenuModify/setting"))
 );
 
 APP.get("/protected/MenuModify/settings.html", (req, res) => {
     if (!req.session.isShopOwner) {
         return res.redirect("/login.html");
     }
-    res.sendFile(path.join(__dirname, "/protected/MenuModify/settings/settings.html"));
+    res.sendFile(path.join(__dirname, "/protected/MenuModify/setting.html"));
 });
 
 // Route for the settings JavaScript file
-APP.get("/protected/MenuModify/settings/settings.js", (req, res) => {
-    if (!req.session.isShopOwner) {
-        return res.status(403).send("Access denied");
-    }
-    res.sendFile(path.join(__dirname, "/protected/MenuModify/settings/settings.js"));
-});
 
 APP.get("/api/shopowner/restaurant", async (req, res) => {
     if (!req.session.isShopOwner) {

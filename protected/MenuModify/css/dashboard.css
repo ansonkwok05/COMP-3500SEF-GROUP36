@@ -1,34 +1,623 @@
-/* Add this to your dashboard.css file */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Roboto, sans-serif;
+    font-weight: 500;
+    background: #fffaf0;
+    min-height: 100vh;
+    padding-bottom: 90px;
+    line-height: 1.5;
+}
+
+/* Header Styles */
+header {
+    background: white;
+    padding: 15px 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #e74c3c;
+    margin: 0;
+}
+
 .header-actions {
     display: flex;
     gap: 15px;
     align-items: center;
 }
 
+/* Settings Button */
 .btn-settings {
-    background-color: #3498db;
+    background: #3498db;
     color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
     text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.3s;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    border: none;
+    cursor: pointer;
 }
 
 .btn-settings:hover {
-    background-color: #2980b9;
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(52, 152, 219, 0.4);
 }
 
+/* Logout Button */
 .btn-logout {
-    background-color: #e74c3c;
+    background: #e74c3c;
     color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
     text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.3s;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    border: none;
+    cursor: pointer;
 }
 
 .btn-logout:hover {
-    background-color: #c0392b;
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(231, 76, 60, 0.4);
+}
+
+.dashboard-container {
+    padding: 20px 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.restaurant-info {
+    background: white;
+    border-radius: 28px;
+    padding: 25px 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.restaurant-info:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 35px rgba(231, 76, 60, 0.15);
+}
+
+.restaurant-info h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.restaurant-details p {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.restaurant-details p:before {
+    content: "•";
+    color: #e74c3c;
+    font-size: 1.5rem;
+}
+
+.menu-section {
+    background: white;
+    border-radius: 28px;
+    padding: 25px 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* Menu Items Grid */
+.menu-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.menu-item {
+    background: white;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 20px 18px;
+    gap: 20px;
+    border: 2px solid transparent;
+}
+
+.menu-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 18px 40px rgba(231, 76, 60, 0.22);
+    border-color: #e74c3c;
+}
+
+.item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+}
+
+.item-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.item-desc {
+    font-size: 0.95rem;
+    color: #7f8c8d;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.item-price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #e74c3c;
+    margin-bottom: 10px;
+}
+
+/* Quantity Controls */
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.quantity-label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.quantity-input {
+    width: 120px;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-family: Roboto, sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #fafafa;
+    text-align: center;
+}
+
+.quantity-input:focus {
+    outline: none;
+    border-color: #e74c3c;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* Item Image */
+.item-image {
+    flex-shrink: 0;
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.item-image:before {
+    content: "🍽️";
+    font-size: 2rem;
+}
+
+/* Buttons */
+.add-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-btn:hover {
+    background: #c0392b;
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.add-btn:before {
+    content: "+";
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.save-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.save-btn:hover {
+    background: #c0392b;
+    transform: scale(1.08);
+}
+
+.delete-btn {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: #7f8c8d;
+    transform: scale(1.08);
+}
+
+.item-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #e74c3c;
+    margin-bottom: 25px;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 15px 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-family: Roboto, sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #e74c3c;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.modal-buttons .save-btn,
+.modal-buttons .cancel-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 1rem;
+}
+
+.cancel-btn {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+/* Loading and Empty States */
+.loading, .no-items {
+    text-align: center;
+    padding: 40px 20px;
+    color: #95a5a6;
+    font-size: 1.1rem;
+    grid-column: 1 / -1;
+    background: #f8f9fa;
+    border-radius: 16px;
+    border: 2px dashed #dee2e6;
+}
+
+/* Bottom Navigation */
+.bottom-navi-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 78px;
+    background: white;
+    border-top: 1px solid #eee;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.12);
+    display: flex;
+    z-index: 1000;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    overflow: hidden;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #95a5a6;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+.nav-item .icon {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    color: #e74c3c;
+    transform: scale(1.1);
+}
+
+/* Error State */
+.form-group input.error,
+.form-group textarea.error {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.05);
+}
+
+/* Success Message */
+.success-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #e74c3c;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+    z-index: 1001;
+    font-weight: 600;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .menu-items {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .section-header h2 {
+        text-align: center;
+    }
+
+    .add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .menu-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 25px 20px;
+    }
+
+    .item-image {
+        width: 140px;
+        height: 140px;
+        margin-bottom: 15px;
+    }
+
+    .item-info {
+        min-height: auto;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+
+    header {
+        flex-direction: column;
+        padding: 15px;
+    }
+
+    header h1 {
+        font-size: 1.6rem;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-settings,
+    .btn-logout {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        padding: 15px 10px;
+    }
+
+    .restaurant-info,
+    .menu-section {
+        padding: 20px 15px;
+    }
+
+    .item-controls {
+        flex-direction: column;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    header h1 {
+        font-size: 1.4rem;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .btn-settings,
+    .btn-logout {
+        width: 100%;
+        justify-content: center;
+    }
 }
