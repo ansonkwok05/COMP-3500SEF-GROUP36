@@ -1,5 +1,3 @@
-// js/deli_login.js
-
 let validEmail = true;
 let validPassword = true;
 

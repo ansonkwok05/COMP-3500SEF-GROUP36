@@ -121,7 +121,7 @@ APP.post("/deli_login", async (req, res) => {
         req.session.userID = await USER_MANAGER.get_user_id(email);
         req.session.isDelivery = true;
 
-        res.redirect("/protected/DeliTakeOrder/TakeOrder.html");
+        res.redirect("/DeliTakeOrder/TakeOrder.html");
 
     } else {
         console.log(`Deliveryman Login Failed: ${email}`);
@@ -515,12 +515,17 @@ APP.delete("/api/shopowner/menu/:id", async (req, res) => {
         res.status(500).json({ error: "Failed to delete menu item" });
     }
 });
-//--- end ----
+
 // only logged in users can access under this
 
 APP.use(
     "/restaurantList/",
     EXPRESS.static(path.join(__dirname, "/protected/restaurantList"))
+);
+
+APP.use(
+    "/DeliTakeOrder",
+    EXPRESS.static(path.join(__dirname, "/protected/DeliTakeOrder"))
 );
 
 APP.use(
@@ -591,6 +596,153 @@ APP.delete("/api/cart/clear", async (req, res) => {
     });
 })
 
+APP.use(BODYPARSER.json());
+APP.use(BODYPARSER.urlencoded({ extended: true }));
+
+
+APP.get("/api/get_user_id", (req, res) => {
+    if (req.session && req.session.userID) {
+        res.status(200).json({ userID: req.session.userID });
+    } else {
+        res.status(404).json({ error: "User not logged in" });
+    }
+});
+
+APP.get("/api/orders", async (req, res) => {
+    const userID = req.query.user_id;
+
+    if (!userID) {
+        return res.status(400).json({ error: "Missing user ID" });
+    }
+
+    const orders = await getOrdersForUser(userID);
+
+    if (!orders) {
+        return res.status(404).json({ orders: [] });
+    }
+
+    res.status(200).json({ orders });
+});
+
+async function getOrdersForUser(userID) {
+    const db = new sqlite3.Database('./db/data.db');
+
+    return new Promise((resolve, reject) => {
+        db.all('SELECT id, status FROM orders WHERE userid = ? OR deliverymanID = ?', [userID, userID], (err, rows) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(rows);
+        });
+    });
+}
+
+APP.post("/api/create_order", async (req, res) => {
+    const { orderID, userID, status } = req.body;
+
+    if (!orderID || !userID || !status)  {
+        return res.status(400).json({ error: "Missing necessary order information" });
+    }
+
+    const db = new sqlite3.Database('./db/data.db');
+
+    db.run('INSERT INTO orders (id, userID, status) VALUES (?, ?, ?)', [orderID, userID, status], function(err) {
+        if (err) {
+            console.error("Error inserting order:", err);
+            return res.status(500).json({ error: "Unable to create an order" });
+        }
+        res.status(201).json({ message: "Order created successfully" });
+    });
+});
+
+APP.get("/api/all_orders", async (req, res) => {
+    const db = new sqlite3.Database('./db/data.db');
+
+    return new Promise((resolve, reject) => {
+        db.all('SELECT * FROM orders WHERE deliverymanID IS NULL', [], (err, rows) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(rows);
+        });
+    }).then(orders => {
+        res.status(200).json({ orders });
+    }).catch(err => {
+        console.error("Error fetching all orders:", err);
+        res.status(500).json({ error: "Unable to fetch orders" });
+    });
+});
+
+// Assign order to deliveryman
+APP.put("/api/order/:orderId/assign", async (req, res) => {
+    const orderId = req.params.orderId;
+    const deliverymanId = req.session.userID;
+    const db = new sqlite3.Database('./db/data.db');
+
+    return new Promise((resolve, reject) => {
+        db.run(
+            'UPDATE orders SET deliverymanID = ? WHERE id = ?',
+            [deliverymanId, orderId],
+            function(err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({ success: true });
+                }
+            }
+        );
+    }).then(result => {
+        res.status(200).json(result);
+    }).catch(err => {
+        console.error("Error assigning order:", err);
+        res.status(500).json({ error: "Unable to assign order" });
+    }).finally(() => {
+        db.close();
+    });
+});
+
+// Get deliveryman's orders
+APP.get("/api/my_delivery_orders", async (req, res) => {
+    if (!req.session?.userID || !req.session?.isDelivery) {
+        return res.status(403).json({ error: "Permission denied" });
+    }
+
+    const deliverymanID = req.query.deliverymanID || req.session.userID;
+
+    const db = new sqlite3.Database('./db/data.db');
+    
+    db.all(
+        `SELECT * FROM orders WHERE deliverymanID = ? ORDER BY created_at DESC`,
+        [deliverymanID],
+        (err, rows) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Database error" });
+            }
+            res.json({ orders: rows });
+        }
+    );
+});
+
+// Display all columns of the orders table
+APP.get("/api/debug/orders/columns", (req, res) => {
+    const db = new sqlite3.Database('./db/data.db');
+
+    db.all("PRAGMA table_info(orders)", (err, rows) => {
+        if (err) {
+            console.error("Error getting table info:", err);
+            res.status(500).json({ error: "Unable to get table info" });
+        } else {
+            console.log("Orders table columns:");
+            rows.forEach(row => {
+                console.log(`  ${row.name} (${row.type})`);
+            });
+            res.status(200).json({ columns: rows });
+        }
+        db.close();
+    });
+});
+
 APP.use(
     "/order_tracking/",
     EXPRESS.static(path.join(__dirname, "/protected/order_tracking"))
@@ -644,7 +796,9 @@ async function start_app() {
             db.run(
                 "CREATE TABLE IF NOT EXISTS cart_items (c_id CHAR(16) PRIMARY KEY NOT NULL, u_id CHAR(16) NOT NULL, quantity INTEGER, m_id CHAR(16) NOT NULL, FOREIGN KEY (m_id) REFERENCES menu_items (m_id))"
             );
-
+            db.run(
+                "CREATE TABLE IF NOT EXISTS orders (id VARCHAR(50) PRIMARY KEY NOT NULL, userID CHAR(16) NOT NULL, deliverymanID CHAR(16), status VARCHAR(50) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (userID) REFERENCES users (id), FOREIGN KEY (deliverymanID) REFERENCES users (id))"
+            );
         });
 
         // initialize example data
