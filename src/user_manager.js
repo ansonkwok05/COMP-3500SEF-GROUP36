@@ -77,6 +77,16 @@ async function get_user_id(email) {
     });
 }
 
+async function get_user_by_email(email) {
+    return new Promise((resolve) => {
+        db.get(
+        "SELECT id, email, name, address FROM users WHERE email = ?",
+        [email],
+        (err, row) => resolve(row || null)
+        )}
+    );
+}
+
 async function validate_user_id(email, user_id) {
     return new Promise((resolve) => {
         db.get(
@@ -105,4 +115,5 @@ module.exports = {
     login_user,
     get_user_id,
     validate_user_id,
+    get_user_by_email,
 };
