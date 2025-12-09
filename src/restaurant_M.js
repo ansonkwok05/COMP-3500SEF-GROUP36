@@ -5,6 +5,22 @@ let db;
 
 function initialize_db(db_path) {
     db = new sqlite3.Database(db_path);
+
+    db.get("PRAGMA table_info(menu_items)", (err, row) => {
+        if (err) return console.error(err);
+        db.all("PRAGMA table_info(menu_items)", (err, rows) => {
+            if (err) return;
+
+            const hasQuantity = rows.some(r => r.name === 'quantity');
+            if (!hasQuantity) {
+                console.log("Adding missing 'quantity' column to menu_items...");
+                db.run("ALTER TABLE menu_items ADD COLUMN quantity INTEGER DEFAULT 0", (err) => {
+                    if (err) console.error("Failed to add quantity column:", err);
+                    else console.log("Successfully added quantity column!");
+                });
+            }
+        });
+    });
 }
 
 
