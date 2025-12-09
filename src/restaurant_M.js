@@ -5,7 +5,21 @@ let db;
 
 function initialize_db(db_path) {
     db = new sqlite3.Database(db_path);
+    db.serialize(() => {
+        db.run(`
+            CREATE TABLE IF NOT EXISTS menu_items (
+                m_id TEXT PRIMARY KEY,
+                r_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                price REAL NOT NULL,
+                description TEXT,
+                quantity INTEGER DEFAULT 0,
+                FOREIGN KEY (r_id) REFERENCES restaurants(r_id)
+            )
+        `);
+    });
 }
+
 
 async function check_dup(name, r_id, dataset) {
     return new Promise((resolve) => {
